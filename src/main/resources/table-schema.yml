@@ -1,0 +1,199 @@
+table:
+  schema:
+    #用户表
+    chika_user: \
+      CREATE TABLE `chika_user` (\
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,\
+      `role` tinyint(2) NOT NULL DEFAULT 1 COMMENT '1表示管理员，2表示访客用户，3表示系统',\
+      `avatar` varchar(100) DEFAULT NULL,\
+      `create` datetime(6) DEFAULT NULL,\
+      `email` varchar(255) DEFAULT NULL,\
+      `enable` tinyint(1) NOT NULL,\
+      `nickname` varchar(50) DEFAULT NULL,\
+      `password` varchar(255) DEFAULT NULL,\
+      `qq_num` varchar(20) DEFAULT NULL,\
+      `qq_open_id` varchar(255) DEFAULT NULL,\
+      `username` varchar(20) DEFAULT NULL,\
+      `wechat_open_id` varchar(255) DEFAULT NULL,\
+      PRIMARY KEY (`id`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+    #系统日志表
+    chika_logger: \
+      CREATE TABLE `chika_logger` (\
+      `id` varchar(255) NOT NULL,\
+      `content_type` varchar(255) DEFAULT NULL,\
+      `ip_addr` varchar(255) DEFAULT NULL,\
+      `ip_info` varchar(255) DEFAULT NULL,\
+      `request_method` varchar(255) DEFAULT NULL,\
+      `session_id` varchar(255) DEFAULT NULL,\
+      `time` datetime(6) DEFAULT NULL,\
+      `url` varchar(255) DEFAULT NULL,\
+      `user_agent` varchar(255) DEFAULT NULL,\
+      `username` varchar(255) DEFAULT NULL,\
+      PRIMARY KEY (`id`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+    #上传文件路径对照表
+    chika_upload: \
+      CREATE TABLE `chika_upload` (\
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,\
+      `disk_path` varchar(255) NOT NULL,\
+      `type` varchar(50) NOT NULL,\
+      `upload` datetime(6) DEFAULT NULL,\
+      `virtual_path` varchar(255) NOT NULL,\
+      PRIMARY KEY (`id`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+    #系统参数表
+    chika_param: \
+      CREATE TABLE `chika_param` (\
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,\
+      `level` int(11) DEFAULT '0' COMMENT '越低表示参数级别权限越高可能会影响系统运行',\
+      `name` varchar(50) NOT NULL,\
+      `order_index` int(11) DEFAULT '0',\
+      `remark` varchar(255) DEFAULT NULL,\
+      `value` text DEFAULT NULL,\
+      PRIMARY KEY (`id`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+    #系统字典表（关键字等固定字段的表）
+    chika_dict: \
+      CREATE TABLE `chika_dict` (\
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,\
+      `enable` tinyint(1) NOT NULL,\
+      `value` varchar(255) NOT NULL,\
+      `type` varchar(50) NOT NULL COMMENT '字典的类型（关键字、节假日等）',\
+      `order_index` int(11) NOT NULL,\
+      PRIMARY KEY (`id`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+    #分类表（包括文章的分类、文件的分类、项目的分类，用type字段区别）
+    chika_cate: \
+      CREATE TABLE `chika_cate` (\
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,\
+      `cn_name` varchar(50) DEFAULT NULL,\
+      `font_icon` varchar(255) DEFAULT NULL,\
+      `name` varchar(50) NOT NULL,\
+      `type` varchar(20) NOT NULL COMMENT '分3种：article、file和project',\
+      `order_index` int(11) NOT NULL,\
+      PRIMARY KEY (`id`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+      #分类参照表（项目、文件、文章的分类都参照此表）
+      chika_cate_refer: \
+        CREATE TABLE `chika_cate_refer` (\
+        `id` bigint(20) NOT NULL AUTO_INCREMENT,\
+        `cate_id` bigint(20) NOT NULL,\
+        `refer_id` varchar(50) NOT NULL,\
+        PRIMARY KEY (`id`)\
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+    #标签表
+    chika_tag: \
+      CREATE TABLE `chika_tag` (\
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,\
+      `name` varchar(50) NOT NULL,\
+      PRIMARY KEY (`id`),\
+      UNIQUE KEY `UK6tfxkiyl7xpuxll97e045281a` (`name`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+    #标签参照表
+    chika_tag_refer: \
+      CREATE TABLE `chika_tag_refer` (\
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,\
+      `refer_id` bigint(20) NOT NULL COMMENT '文章id或者是笔记id或者是项目id或文件id',\
+      `tag_id` bigint(20) NOT NULL,\
+      `type` varchar(50) NOT NULL,\
+      PRIMARY KEY (`id`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+    #文章表(文章可属于多个分类，文章分类参考chika_cate_refer多个字段
+    chika_article: \
+      CREATE TABLE `chika_article` (\
+      `id` varchar(50) NOT NULL,\
+      `appreciable` bit(1) NOT NULL DEFAULT 0,\
+      `approve_cnt` int(11) NOT NULL,\
+      `author_id` bigint(20) DEFAULT NULL,\
+      `commented` bit(1) NOT NULL DEFAULT 0,\
+      `content` mediumtext NOT NULL,\
+      `cover` varchar(255) DEFAULT NULL,\
+      `draft` bit(1) NOT NULL DEFAULT 1,\
+      `md_content` mediumtext,\
+      `modify` datetime(6) DEFAULT NULL,\
+      `post` datetime(6) NOT NULL,\
+      `summary` varchar(300) DEFAULT NULL,\
+      `text_content` mediumtext,\
+      `title` varchar(100) NOT NULL,\
+      `top` int(11) DEFAULT NULL,\
+      `url_seq` varchar(100) DEFAULT NULL,\
+      `view` int(11) NOT NULL,\
+      PRIMARY KEY (`id`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+    #笔记表
+    chika_note: \
+      CREATE TABLE `chika_note` (\
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,\
+      `clear_content` text,\
+      `content` text NOT NULL,\
+      `md_content` text,\
+      `modify` datetime(6) DEFAULT NULL,\
+      `post` datetime(6) NOT NULL,\
+      `show` tinyint(1) NOT NULL,\
+      `title` varchar(50) NOT NULL,\
+      `top` tinyint(1) NOT NULL,\
+      PRIMARY KEY (`id`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+    #文件分享表
+    chika_file: \
+      CREATE TABLE `chika_file` (\
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,\
+      `description` varchar(500) DEFAULT NULL,\
+      `modify` datetime(6) DEFAULT NULL,\
+      `name` varchar(255) NOT NULL,\
+      `post` datetime(6) DEFAULT NULL,\
+      `url` varchar(255) DEFAULT NULL,\
+      PRIMARY KEY (`id`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+    #个人项目展示表
+    chika_project: \
+      CREATE TABLE `chika_project` (\
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,\
+      `cover` varchar(255) NOT NULL,\
+      `description` varchar(255) DEFAULT NULL,\
+      `modify` datetime(6) DEFAULT NULL,\
+      `name` varchar(11) NOT NULL,\
+      `post` datetime(6) DEFAULT NULL,\
+      `url` varchar(255) DEFAULT NULL,\
+      PRIMARY KEY (`id`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+    #用户留言表
+    chika_message: \
+      CREATE TABLE `chika_message` (\
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,\
+      `clear_comment` varchar(255) DEFAULT NULL,\
+      `comment` varchar(255) NOT NULL,\
+      `enable` tinyint(1) DEFAULT NULL,\
+      `ip_addr` varchar(50) DEFAULT NULL,\
+      `ip_cn_addr` varchar(50) DEFAULT NULL,\
+      `post` datetime(6) DEFAULT NULL,\
+      `user_agent` varchar(255) DEFAULT NULL,\
+      `user_id` bigint(20) NOT NULL,\
+      PRIMARY KEY (`id`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+    #文章评论表
+    chika_comment: \
+      CREATE TABLE `chika_comment` (\
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,\
+      `article_id` bigint(20) NOT NULL,\
+      `clear_comment` text,\
+      `comment` text,\
+      `enable` tinyint(1) NOT NULL,\
+      `ip_addr` varchar(50) DEFAULT NULL,\
+      `ip_cn_addr` varchar(100) DEFAULT NULL,\
+      `post` datetime(6) DEFAULT NULL,\
+      `user_agent` varchar(255) DEFAULT NULL,\
+      `user_id` bigint(20) NOT NULL,\
+      PRIMARY KEY (`id`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
+    #个人信息页面表
+    chika_profile: \
+      CREATE TABLE `chika_profile` (\
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,\
+      `content` text NOT NULL,\
+      `md_content` text NOT NULL,\
+      `name` varchar(50) DEFAULT NULL,\
+      `tab` varchar(50) DEFAULT NULL,\
+      PRIMARY KEY (`id`)\
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\

@@ -1,0 +1,53 @@
+/** Created By Wuwenbin https://wuwenbin.me
+ * mail to wuwenbinwork@163.com
+ * 欢迎加入我们，QQ群：697053454
+ * if you use the code,  please do not delete the comment
+ * 如果您使用了此代码，请勿删除此头部注释
+ * */
+.layui-fluid {
+    background-color: #f8f8f8;
+}
+
+.layui-slogan {
+    font-size: 1rem;
+}
+
+.layui-slogan > span:first-child {
+    color: #2F4056;
+    font-style: italic;
+}
+
+.layui-danger-star, .layui-danger-attention {
+    color: #FF5722;
+}
+
+.layui-init-container {
+    margin: 5% auto 5% auto;
+}
+
+.hr {
+    margin-bottom: 20px;
+}
+
+input, .layui-form-select {
+    width: 250px !important;
+}
+
+.layui-form-mid.layui-word-aux {
+    margin-left: 65px;
+}
+
+@media screen and (min-width: 768px) {
+    .layui-init-container {
+        width: 600px;
+        background-color: #ffffff;
+        padding: 30px 80px;
+        box-shadow: 0 0 5px #a2a2a2;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .layui-init-container {
+        width: 300px;
+    }
+}
