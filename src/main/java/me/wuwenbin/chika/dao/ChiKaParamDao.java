@@ -15,7 +15,7 @@ public interface ChiKaParamDao extends BaseMapper<ChiKaParam> {
      *
      * @return
      */
-    ChiKaParam selectValueByName(String name);
+    ChiKaParam findByName(String name);
 
     /**
      * 根据key更新name
@@ -24,5 +24,5 @@ public interface ChiKaParamDao extends BaseMapper<ChiKaParam> {
      * @param name
      * @return
      */
-    int updateValueByName(Object value, String name);
+    void updateValueByName(Object value, String name);
 }

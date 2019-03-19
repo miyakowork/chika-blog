@@ -85,7 +85,7 @@ public class InitializationListener implements ApplicationListener<ContextRefres
                 log.info("「千夏博客」正在检测初始化环境，请稍后...");
                 ChiKaParam count = ChiKaParam.builder().name(ChiKaKey.SYSTEM_INIT_STATE.key()).build();
                 long cnt = sqlManager.templateCount(count);
-                ChiKaParam param = paramDao.selectValueByName(ChiKaKey.SYSTEM_INIT_STATE.key());
+                ChiKaParam param = paramDao.findByName(ChiKaKey.SYSTEM_INIT_STATE.key());
                 if (cnt == 0 || !ChikaValue.ENABLE.val().equals(param.getValue())) {
                     log.info("「千夏博客」开始初始化，请稍后...");
                     truncateAllaTables();
@@ -166,7 +166,7 @@ public class InitializationListener implements ApplicationListener<ContextRefres
      */
     private void setUpUpload() {
         log.info("「千夏博客」正在初始化文件上传目录，请稍后...");
-        ChiKaParam param = paramDao.selectValueByName(ChiKaKey.UPLOAD_TYPE.key());
+        ChiKaParam param = paramDao.findByName(ChiKaKey.UPLOAD_TYPE.key());
         String value = param.getValue();
         if (ChikaValue.LOCAL_SERVER.strVal().equalsIgnoreCase(value)) {
             String path = env.getProperty(ChiKaConstant.UPLOAD_PATH_KEY);

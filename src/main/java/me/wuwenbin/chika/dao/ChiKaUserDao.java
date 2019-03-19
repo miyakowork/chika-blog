@@ -9,4 +9,21 @@ import org.beetl.sql.core.mapper.BaseMapper;
  */
 @BeetlSqlDao
 public interface ChiKaUserDao extends BaseMapper<ChiKaUser> {
+
+    /**
+     * 查找登录用户是否存在
+     *
+     * @param username
+     * @param password
+     * @return
+     */
+    ChiKaUser findLoginUser(String username, String password);
+
+    /**
+     * 根据openid查找用户
+     *
+     * @param openId
+     * @return
+     */
+    ChiKaUser findByQqOpenId(String openId, Boolean enable);
 }

@@ -1,4 +1,4 @@
-selectValueByName
+findByName
 ===
 ```mysql
 select value from chika_param where name = #name#

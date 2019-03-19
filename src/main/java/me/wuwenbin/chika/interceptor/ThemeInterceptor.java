@@ -24,12 +24,12 @@ public class ThemeInterceptor implements HandlerInterceptor {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) {
         String view = modelAndView.getViewName();
-        ChiKaParam themeId = paramDao.selectValueByName(ChiKaKey.THEME_ID.key());
+        ChiKaParam themeId = paramDao.findByName(ChiKaKey.THEME_ID.key());
         String viewName;
         if (StringUtils.isEmpty(themeId.getValue())) {
             viewName = view;
         } else {
-            viewName = "theme::" + themeId.getValue() + "/" + view;
+            viewName = themeId.getValue() + "/" + view;
         }
         modelAndView.setViewName(viewName);
     }

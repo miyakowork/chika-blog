@@ -4,7 +4,7 @@ import me.wuwenbin.chika.dao.ChiKaParamDao;
 import me.wuwenbin.chika.interceptor.AdminInterceptor;
 import me.wuwenbin.chika.interceptor.SessionInterceptor;
 import me.wuwenbin.chika.interceptor.ThemeInterceptor;
-import me.wuwenbin.chika.interceptor.UserInterceptor;
+import me.wuwenbin.chika.interceptor.TokenInterceptor;
 import me.wuwenbin.chika.model.constant.ChikaValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -53,9 +53,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        List<String> excludePaths = Arrays.asList("/static/**", "/error/**", "/init/**");
+        List<String> excludePaths = Arrays.asList("/static/**", "/error/**", "/init/**", "/login/**", "/register/**");
         registry.addInterceptor(new SessionInterceptor(paramDao)).addPathPatterns("/**").excludePathPatterns(excludePaths);
-        registry.addInterceptor(new UserInterceptor()).addPathPatterns("/token/**");
+        registry.addInterceptor(new TokenInterceptor()).addPathPatterns("/token/**");
         registry.addInterceptor(new AdminInterceptor()).addPathPatterns("/management/**");
         registry.addInterceptor(new ThemeInterceptor(paramDao)).addPathPatterns("/**").excludePathPatterns(excludePaths);
     }
