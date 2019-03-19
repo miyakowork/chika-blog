@@ -13,6 +13,7 @@ import me.wuwenbin.chika.model.entity.ChiKaUser;
 import me.wuwenbin.chika.service.InitService;
 import me.wuwenbin.chika.util.ChiKaKit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -35,16 +36,23 @@ public class InitServiceImpl implements InitService {
 
     private final ChiKaParamDao paramDao;
     private final ChiKaUserDao userDao;
+    private final Environment env;
 
     @Autowired
-    public InitServiceImpl(ChiKaParamDao paramDao, ChiKaUserDao userDao) {
+    public InitServiceImpl(ChiKaParamDao paramDao, ChiKaUserDao userDao, Environment env) {
         this.paramDao = paramDao;
         this.userDao = userDao;
+        this.env = env;
     }
 
     @Override
     public Result initSystem(Map<String, String[]> param) {
         Map<String, Object> paramMap = ChiKaKit.getParameterMap(param);
+        if (paramMap.get(uploadTypeKey).equals(ChikaValue.LOCAL_SERVER.strVal())) {
+            if (StringUtils.isEmpty(env.getProperty(ChiKaConstant.UPLOAD_PATH_KEY))) {
+                return Result.error("配置文件「application-chika.properties」中「chika.upload.path」未正确配置！");
+            }
+        }
         try {
             Map<String, Object> pm = initUser(paramMap);
             Map<String, Object> pm2 = initUpload(pm);
@@ -55,6 +63,7 @@ public class InitServiceImpl implements InitService {
                     paramDao.updateValueByName(value, key);
                 }
             }
+            paramDao.updateValueByName(ChikaValue.ENABLE.intVal(), ChiKaKey.SYSTEM_INIT_STATE.key());
             return Result.ok("初始化设置成功！");
         } catch (Exception e) {
             log.error("系统初始化设置异常", e);

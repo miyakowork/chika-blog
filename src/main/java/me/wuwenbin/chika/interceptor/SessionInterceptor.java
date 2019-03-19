@@ -26,7 +26,7 @@ public class SessionInterceptor implements HandlerInterceptor {
         if (param == null || !ChikaValue.ENABLE.strVal().equals(param.getValue())) {
             response.sendRedirect(ChikaValue.INIT_URL.strVal());
         }
-        return false;
+        return true;
     }
 
 }

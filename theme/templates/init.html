@@ -19,14 +19,14 @@
         带红色[<span class="layui-danger-attention">!</span>]的为提交不可更改项目。
     </blockquote>
     <hr class="hr layui-bg-gray">
-    <form class="layui-form" action="">
+    <form class="layui-form" onkeydown="if (event.keyCode === 13) {layer.msg('请不要回车键键操作！', {icon: 2});return false;}">
         <div id="base-form">
             <div class="layui-form-item">
                 <label class="layui-form-label">
                     站点标题
                 </label>
                 <div class="layui-input-inline">
-                    <input type="text" name="website_title" required lay-verify="required"
+                    <input type="text" name="website_title" lay-verify="required"
                            placeholder="网站标题"
                            autocomplete="off" class="layui-input">
                 </div>
@@ -41,7 +41,7 @@
                     LOGO文字
                 </label>
                 <div class="layui-input-inline">
-                    <input type="text" name="website_logo_words" required lay-verify="required"
+                    <input type="text" name="website_logo_words" lay-verify="required"
                            placeholder="LOGO处文字"
                            autocomplete="off" class="layui-input">
                 </div>
@@ -56,7 +56,7 @@
                     您的用户名
                 </label>
                 <div class="layui-input-inline">
-                    <input type="text" name="_username" required lay-verify="required|username"
+                    <input type="text" name="_username" lay-verify="required|username"
                            placeholder="登录账号"
                            autocomplete="off" class="layui-input">
                 </div>
@@ -71,7 +71,7 @@
                     登录密码
                 </label>
                 <div class="layui-input-inline">
-                    <input type="password" name="_password" required lay-verify="required|pass"
+                    <input type="password" name="_password" lay-verify="required|pass"
                            placeholder="登录密码"
                            autocomplete="off" class="layui-input">
                 </div>
@@ -86,7 +86,7 @@
                     重录密码
                 </label>
                 <div class="layui-input-inline">
-                    <input type="password" name="repeatPass" required lay-verify="required|repeatPass"
+                    <input type="password" name="repeatPass" lay-verify="required|repeatPass"
                            placeholder="重复输入上面的密码"
                            autocomplete="off" class="layui-input">
                 </div>
@@ -103,7 +103,7 @@
                     电子邮件
                 </label>
                 <div class="layui-input-inline">
-                    <input type="text" name="_email" required lay-verify="required|mail"
+                    <input type="text" name="_email" lay-verify="required|mail"
                            placeholder="输入您的电子邮件"
                            autocomplete="email" class="layui-input">
                 </div>
@@ -116,7 +116,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">上传方式</label>
                 <div class="layui-input-inline">
-                    <select name="upload_type" required lay-verify="required" lay-filter="uploadMethod">
+                    <select name="upload_type" lay-verify="required" lay-filter="uploadMethod">
                         <option value="">请选择文件上传模式</option>
                         <option value="local_server">本地服务器</option>
                         <option value="qiniu_server">七牛云方式</option>
@@ -125,6 +125,24 @@
                 <div class="layui-form-mid layui-word-aux">
                     选择上传文件/图片的模式
                     <span class="layui-danger-star">*</span>
+                </div>
+            </div>
+
+            <div id="local" style="display: none;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        配置路径
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" disabled readonly name="local_server"
+                               th:value="${#strings.isEmpty(uploadPathInEnv)?'未配置路径，请配置之后重启项目':uploadPathInEnv}"
+                               style="background: rgba(214,214,214,0.52);"
+                               autocomplete="off"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">
+                        在配置文件中配置的值
+                    </div>
                 </div>
             </div>
 

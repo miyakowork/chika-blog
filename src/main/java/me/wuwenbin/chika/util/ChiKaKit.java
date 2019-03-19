@@ -9,6 +9,8 @@ import me.wuwenbin.chika.model.bean.IpInfo;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,6 +21,7 @@ import java.util.Map;
  * created by Wuwenbin on 2019/3/11 at 15:51
  */
 @Slf4j
+@Component
 public class ChiKaKit implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext = null;
@@ -85,6 +88,18 @@ public class ChiKaKit implements ApplicationContextAware {
             returnMap.put(name, value);
         }
         return returnMap;
+    }
+
+    /**
+     * 获取配置文件的属性值
+     *
+     * @param key
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    public static <T> T getEnvPropertyByKey(String key, Class<T> clazz) {
+        return getBean(Environment.class).getProperty(key, clazz);
     }
 
     /**

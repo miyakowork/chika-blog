@@ -125,7 +125,7 @@ public enum ChiKaKey {
      */
     INFO_LABEL_CONTENT(ChikaValue.INFO_LABEL_CONTENT.val(), MID.intVal(), "信息板内容"),
     ARTICLE_SUMMARY_WORDS_LENGTH(DEFAULT_SUMMARY_LENGTH.val(), MID.intVal(), "文章摘要文字长度"),
-    BLOG_INDEX_PAGE_SIZE(DEFAULT_PAGE_SIZE.val(), MID.intVal(), "文章摘要文字长度"),
+    BLOG_INDEX_PAGE_SIZE(DEFAULT_PAGE_SIZE.val(), MID.intVal(), "博客列表文章数目"),
     COMMENT_LENGTH(ChikaValue.COMMENT_LENGTH.val(), MID.intVal(), "评论文字长度"),
     THEME_NAME(DEFAULT_THEME_NAME.val(), HIGHEST.intVal(), "使用的主题名字"),
     THEME_ID(DEFAULT_THEME_ID.val(), HIGHEST.intVal(), "使用的主题的唯一编号id"),

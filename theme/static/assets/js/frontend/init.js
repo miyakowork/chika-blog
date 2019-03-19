@@ -30,7 +30,7 @@ layui.use('form', function () {
             , '密码必须6到12位，且不能出现空格'
         ]
         , repeatPass: function (value) {
-            var pass = $("input[name=password]").val();
+            var pass = $("input[name=_password]").val();
             if (pass !== value) {
                 return '两次输入的密码不一致';
             }
@@ -60,16 +60,22 @@ layui.use('form', function () {
     form.on('select(uploadMethod)', function (data) {
         if (data.value === 'qiniu_server') {
             $("#qiniu").show();
+            $("#local").hide();
         } else if (data.value === 'local_server') {
             layer.alert('请确保在「application-chika.properties」文件中配置了「chika.upload.path」属性！', {icon: 0});
+            $("#local").show();
             $("#qiniu").hide();
         } else {
             layer.alert("请选择文件上传方式！");
             $("#qiniu").hide();
+            $("#local").hide();
         }
     });
 
     form.on('submit(chikaSubmit)', function (data) {
+        if (window.event.keyCode === 13) {
+            return false;
+        }
         var html = '<p style="color: #FF5722;">请确认您所填的信息</p>';
         var obj = data.field;
         var originUploadMethod = data.field.upload_type;
@@ -100,7 +106,7 @@ layui.use('form', function () {
                     return false;
                 }
             }
-            obj.password = md5(data.field.password);
+            obj._password = md5(data.field._password);
             $.post('/init/submit'
                 , obj
                 , function (json) {
@@ -117,6 +123,5 @@ layui.use('form', function () {
     });
 
 });
-
 
 
