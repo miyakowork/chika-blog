@@ -1,5 +1,6 @@
-package me.wuwenbin.chika.controller;
+package me.wuwenbin.chika.controller.error;
 
+import me.wuwenbin.chika.controller.BaseController;
 import me.wuwenbin.chika.model.bean.Result;
 import org.springframework.boot.autoconfigure.web.ErrorProperties;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
