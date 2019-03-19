@@ -19,6 +19,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -73,6 +74,7 @@ public class LoginController extends BaseController {
     }
 
     @PostMapping("/login")
+    @ResponseBody
     public Result login(SimpleLoginModel model) {
         if (StringUtils.isEmpty(model.getChiKaCode())) {
             return Result.error("验证码为空！");
