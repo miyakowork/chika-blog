@@ -47,16 +47,17 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     /**
      * 全局拦截器
-     * 顺序：系统初始化-->用户是否登录-->后台管理用户验证-->视图主题渲染
+     * 顺序：系统初始化/访问日志-->用户是否登录-->后台管理用户验证-->视图主题渲染
      *
      * @param registry
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        List<String> excludePaths = Arrays.asList("/static/**", "/error/**", "/init/**", "/login/**", "/register/**");
+        List<String> excludePaths = Arrays.asList("/static/**", "/error/**", "/init/**");
+        List<String> excludePaths2 = Arrays.asList("/api/qq", "/api/qqCallback");
         registry.addInterceptor(new SessionInterceptor(paramDao)).addPathPatterns("/**").excludePathPatterns(excludePaths);
         registry.addInterceptor(new TokenInterceptor()).addPathPatterns("/token/**");
         registry.addInterceptor(new AdminInterceptor()).addPathPatterns("/management/**");
-        registry.addInterceptor(new ThemeInterceptor(paramDao)).addPathPatterns("/**").excludePathPatterns(excludePaths);
+        registry.addInterceptor(new ThemeInterceptor(paramDao)).addPathPatterns("/**").excludePathPatterns(excludePaths).excludePathPatterns(excludePaths2);
     }
 }

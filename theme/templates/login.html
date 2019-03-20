@@ -3,45 +3,52 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Lowin</title>
+    <title>千夏博客 - 登 录</title>
     <link rel="stylesheet" href="/static/assets/css/frontend/login.css" type="text/css">
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css" type="text/css">
 </head>
 
 <body>
-<div class="lowin lowin-red">
+<h2 style="margin-top: 60px;color: #ff6464;">千 夏 博 客</h2>
+<div class="lowin lowin-red" style="margin-top: 10px;">
     <div class="lowin-brand">
         <img src="/static/assets/img/login_avatar.jpg" alt="logo">
     </div>
     <div class="lowin-wrapper">
         <div class="lowin-box lowin-login">
             <div class="lowin-box-inner">
-                <form>
+                <form data-target="">
                     <p>登录以继续</p>
                     <div class="lowin-group">
-                        <label>账号 <a href="#" class="login-back-link"></a></label>
-                        <input type="email" autocomplete="email" name="email" class="lowin-input">
+                        <label>邮箱/账号 <a tabindex=-1 href="#" class="login-back-link">登录</a></label>
+                        <input type="text" autocomplete="off" name="chiKaUser" class="lowin-input">
                     </div>
+
                     <div class="lowin-group password-group">
-                        <label>密码 <a href="#" class="forgot-link">忘记密码？</a></label>
-                        <input type="password" name="password" autocomplete="current-password" class="lowin-input">
+                        <label>密码 <a tabindex=-1 href="#" class="forgot-link" style="outline: none;">忘记密码？</a></label>
+                        <input type="password" name="chiKaPass" autocomplete="off" class="lowin-input">
                     </div>
                     <button class="lowin-btn login-btn">
-                        登  录
+                        登 录
                     </button>
 
                     <div class="text-foot">
-                       还没有账号？ <a href="" class="register-link">点我注册</a>
+                        没有账号？<a href="javascript:doRegister()">注册</a>或第三方验证<a href="" class="register-link">登录</a>
                     </div>
                 </form>
             </div>
         </div>
 
         <div class="lowin-box lowin-register">
+
             <div class="lowin-box-inner">
-                <p>
-                    <a href="#"><img src="/static/assets/img/qq.png" style="width: 50px;"></a>
+                <p style="margin-top: 20px;">第三方注册／登录</p>
+                <p id="fromQqLogin">
+                    <a href="/api/qq" onclick="layer.msg('正在通过QQ登入', {icon:16, shade: 0.1, time:0})"
+                       style="border: none;"><img src="/static/assets/img/qq.png" style="width: 50px;"
+                                                  alt="qq"></a>
                 </p>
-                <p style="margin-top: 20px;">QQ 第三方注册</p>
+                <p style="margin-top: 20px;" id="fromQqLoginTxt">QQ</p>
                 <div class="text-foot">
                     已有账号？ <a href="" class="login-link">点我登录</a>
                 </div>
@@ -50,27 +57,31 @@
     </div>
 
     <footer class="lowin-footer">
-        <p><i class="fa fa-graduation-cap"></i> 2019 <a href="https://github.com/miyakowork/noteblogv4" target="_blank">千夏博客&copy;</a></p>
-        <p>
+        <p><i class="fa fa-graduation-cap"></i> 2019 <a href="https://github.com/miyakowork/chika-blog" target="_blank">千夏博客&copy;</a>
+        </p>
+        <p style="margin-top: 10px;">
             <span><a href="//wuwenbin.me" target="_blank">作者博客</a></span>&nbsp;
-            <span><a href="https://github.com/miyakowork/noteblogv4" target="_blank">获取源码</a></span>&nbsp;
+            <span><a href="https://github.com/miyakowork/chika-blog" target="_blank">获取源码</a></span>&nbsp;
             <span><a href="//fly.layui.com/case/u/3425688" target="_blank">点赞作者</a></span>
         </p>
     </footer>
 </div>
-<script src="/static/plugins/jquery/jquery-1.11.3.min.js"></script>
+<script src="/static/plugins/layui/layui.all.js"></script>
+<script src="/static/assets/js/chika.js"></script>
+<script src="/static/plugins/md5/md5.min.js"></script>
+<script src="/static/assets/js/frontend/effect.js"></script>
 <script src="/static/assets/js/frontend/login.js"></script>
-<script>
-    Auth.init({
-        login_url: '/#login',
-        forgot_url: '/#forgot'
-    });
+<script th:inline="javascript">
+    var isSetSendMailServer = [[${isSetSendMailServer}]];
 
-    $("form").submit(function () {
-        alert($(this).attr("action"));
-        alert(111)
-        return false;
-    })
+    function doRegister() {
+        if (isSetSendMailServer) {
+            location.href = "/register";
+        } else {
+            layer.msg("未开放邮箱注册，请使用第三方平台登录！");
+        }
+    }
+
 </script>
 </body>
 </html>

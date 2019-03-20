@@ -43,6 +43,7 @@ import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -234,7 +235,7 @@ public class InitializationListener implements ApplicationListener<ContextRefres
                 .textContent(textContent)
                 .summary(summary)
                 .mdContent(mdContent)
-                .post(LocalDateTime.now())
+                .post(new Date())
                 .draft(false)
                 .appreciable(true)
                 .title(title)

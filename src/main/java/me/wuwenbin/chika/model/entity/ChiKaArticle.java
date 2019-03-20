@@ -8,7 +8,7 @@ import org.beetl.sql.core.annotatoin.AssignID;
 import org.beetl.sql.core.annotatoin.Table;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import static cn.hutool.core.util.RandomUtil.randomInt;
 import static java.lang.Boolean.TRUE;
@@ -45,6 +45,6 @@ public class ChiKaArticle implements Serializable {
     private String textContent;
     private String title;
     private String urlSeq;
-    private LocalDateTime modify;
-    private LocalDateTime post;
+    private Date modify;
+    private Date post;
 }

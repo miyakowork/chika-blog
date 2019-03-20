@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.beetl.sql.core.annotatoin.Table;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * created by Wuwenbin on 2019/3/13 at 13:14
@@ -26,6 +26,6 @@ public class ChiKaNote implements Serializable {
     private String content;
     private String mdContent;
     private String title;
-    private LocalDateTime modify;
-    private LocalDateTime post;
+    private Date modify;
+    private Date post;
 }

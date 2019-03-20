@@ -13,4 +13,9 @@ public class CommonController {
     public String index() {
         return "index";
     }
+
+    @GetMapping("/management/index")
+    public String mIndex() {
+        return "index2";
+    }
 }

@@ -3,7 +3,7 @@ package me.wuwenbin.chika.service.impl.login;
 import cn.hutool.cache.Cache;
 import me.wuwenbin.chika.dao.ChiKaUserDao;
 import me.wuwenbin.chika.model.bean.Result;
-import me.wuwenbin.chika.model.bean.login.SimpleLoginModel;
+import me.wuwenbin.chika.model.bean.login.SimpleLoginData;
 import me.wuwenbin.chika.model.constant.ChiKaConstant;
 import me.wuwenbin.chika.model.constant.ChikaValue;
 import me.wuwenbin.chika.model.entity.ChiKaUser;
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Service("simpleLoginService")
 @Transactional(rollbackFor = Exception.class)
-public class SimpleLoginServiceImpl implements LoginService<Result, SimpleLoginModel> {
+public class SimpleLoginServiceImpl implements LoginService<Result, SimpleLoginData> {
 
     private final ChiKaUserDao userDao;
     private final Cache<String, AtomicInteger> passwordRetryCache;
@@ -32,8 +32,8 @@ public class SimpleLoginServiceImpl implements LoginService<Result, SimpleLoginM
 
 
     @Override
-    public Result doLogin(SimpleLoginModel param) {
-        String username = param.getChiKaUser();
+    public Result doLogin(SimpleLoginData data) {
+        String username = data.getChiKaUser();
         //retry count + 1
         AtomicInteger retryCount = passwordRetryCache.get(username);
         if (retryCount == null) {
@@ -44,10 +44,12 @@ public class SimpleLoginServiceImpl implements LoginService<Result, SimpleLoginM
             //if retry count > 5 throw
             return Result.error("密码输入错误次数过多");
         }
-        ChiKaUser loginUser = userDao.findLoginUser(username, param.getChiKaPass());
+        ChiKaUser loginUser = userDao.findLoginUser(username, data.getChiKaPass());
         if (loginUser != null) {
             int role = loginUser.getRole();
             String successText = "登录成功！";
+            data.getRequest().getSession().setAttribute(ChiKaConstant.SESSION_USER_KEY, loginUser);
+            data.getRequest().getSession().setMaxInactiveInterval(30 * 60);
             //clear retry count
             passwordRetryCache.remove(username);
             if (role == ChiKaConstant.ROLE_ADMIN) {
@@ -56,7 +58,7 @@ public class SimpleLoginServiceImpl implements LoginService<Result, SimpleLoginM
                 return Result.ok(successText, ChikaValue.FRONTEND_INDEX.strVal());
             }
         } else {
-            return Result.error("用户名不存在或密码错误或用户已被锁定！");
+            return Result.error("用户不存在或密码错误或被锁定！");
         }
     }
 

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.beetl.sql.core.annotatoin.Table;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * created by Wuwenbin on 2019/3/13 at 12:31
@@ -28,5 +28,5 @@ public class ChiKaLogger implements Serializable {
     private String url;
     private String userAgent;
     private String username;
-    private LocalDateTime time;
+    private Date time;
 }

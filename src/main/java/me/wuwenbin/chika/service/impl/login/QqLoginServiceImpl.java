@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.wuwenbin.chika.dao.ChiKaParamDao;
 import me.wuwenbin.chika.dao.ChiKaUserDao;
 import me.wuwenbin.chika.model.bean.Result;
-import me.wuwenbin.chika.model.bean.login.QqLoginModel;
+import me.wuwenbin.chika.model.bean.login.QqLoginData;
 import me.wuwenbin.chika.model.constant.ChiKaConstant;
 import me.wuwenbin.chika.model.constant.ChiKaKey;
 import me.wuwenbin.chika.model.entity.ChiKaUser;
@@ -23,7 +23,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service("qqLoginService")
-public class QqLoginServiceImpl implements LoginService<Result, QqLoginModel> {
+public class QqLoginServiceImpl implements LoginService<Result, QqLoginData> {
 
     private final ChiKaUserDao userDao;
     private final ChiKaParamDao paramDao;
@@ -35,7 +35,7 @@ public class QqLoginServiceImpl implements LoginService<Result, QqLoginModel> {
     }
 
     @Override
-    public Result doLogin(QqLoginModel model) {
+    public Result doLogin(QqLoginData data) {
         try {
             String appId = paramDao.findByName(ChiKaKey.QQ_APP_ID.key()).getValue();
             String appKey = paramDao.findByName(ChiKaKey.QQ_APP_KEY.key()).getValue();
@@ -43,8 +43,8 @@ public class QqLoginServiceImpl implements LoginService<Result, QqLoginModel> {
             Map<String, Object> p1 = MapUtil.of("grant_type", "authorization_code");
             p1.put("client_id", appId);
             p1.put("client_secret", appKey);
-            p1.put("code", model.getCode());
-            p1.put("redirect_uri", model.getCallbackDomain());
+            p1.put("code", data.getCode());
+            p1.put("redirect_uri", data.getCallbackDomain());
 
             String resp1 = HttpUtil.get("https://graph.qq.com/oauth2.0/token", p1);
             String accessToken = resp1.substring(13, resp1.length() - 66);
@@ -66,6 +66,8 @@ public class QqLoginServiceImpl implements LoginService<Result, QqLoginModel> {
                         return Result.error("QQ登录授权失败，原因：用户已被锁定！");
                     }
                     String nickname = json2.getStr("nickname");
+                    int cnt = userDao.countNickname(nickname);
+                    nickname = cnt > 0 ? nickname + new java.util.Date().getTime() : nickname;
                     String avatar = json2.getStr("figureurl_qq_2").replace("http://", "https://");
                     ChiKaUser registerUser = ChiKaUser.builder().nickname(nickname).avatar(avatar).qqOpenId(openId).build();
                     userDao.insertTemplate(registerUser, true);

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.beetl.sql.core.annotatoin.Table;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * created by Wuwenbin on 2019/3/13 at 12:32
@@ -23,5 +23,5 @@ public class ChiKaUpload implements Serializable {
     private String diskPath;
     private String type;
     private String virtualPath;
-    private LocalDateTime upload;
+    private Date upload;
 }

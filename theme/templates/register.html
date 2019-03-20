@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>千夏博客 - 注册</title>
+    <link rel="stylesheet" href="/static/assets/css/frontend/login.css" type="text/css">
+</head>
+
+<body>
+<h2 style="margin-top: 60px;color: #ff6464;">千 夏 博 客</h2>
+<div class="lowin lowin-red" style="margin-top: 10px;">
+    <div class="lowin-brand">
+        <img src="/static/assets/img/login_avatar.jpg" alt="logo">
+    </div>
+    <div class="lowin-wrapper">
+        <div class="lowin-box lowin-login">
+            <div class="lowin-box-inner">
+                <form>
+                    <p>注 册 账 号</p>
+                    <div class="lowin-group">
+                        <label>邮箱 <a href="#" class="login-back-link"></a></label>
+                        <input type="email" autocomplete="off" name="_email" class="lowin-input" placeholder="邮箱">
+                    </div>
+                    <div class="lowin-group password-group">
+                        <label>密码 </label>
+                        <input type="password" name="_password" autocomplete="off" class="lowin-input"
+                               placeholder="密码">
+                    </div>
+                    <div class="lowin-group password-group">
+                        <label>重复密码 </label>
+                        <input type="password" name="repeatPass" autocomplete="off" class="lowin-input"
+                               placeholder="重复密码">
+                    </div>
+                    <div class="lowin-group password-group">
+                        <label>邮箱验证码 </label>
+                        <input type="text" name="mailCode" autocomplete="off" placeholder="邮箱验证码" class="lowin-input"
+                               style="width: 180px;display: inline;float: left;">
+                        <button class="lowin-btn" style="width: 120px;float: right;display: inline;" type="button"
+                                id="sendMailCode"><span id="sendCode">点击发送</span><span id="sendSeconds"></span>
+                        </button>
+                    </div>
+                    <button class="lowin-btn login-btn" style="margin-top: 25px;">
+                        注 册
+                    </button>
+
+                    <div class="text-foot">
+                        已有账号？前往<a href="/login" class="register-link">登录</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="lowin-footer" style="margin-top: 500px;">
+        <p><i class="fa fa-graduation-cap"></i> 2019 <a href="https://github.com/miyakowork/chika-blog" target="_blank">千夏博客&copy;</a>
+        </p>
+        <p>
+            <span><a href="//wuwenbin.me" target="_blank">作者博客</a></span>&nbsp;
+            <span><a href="https://github.com/miyakowork/chika-blog" target="_blank">获取源码</a></span>&nbsp;
+            <span><a href="//fly.layui.com/case/u/3425688" target="_blank">点赞作者</a></span>
+        </p>
+    </footer>
+</div>
+<script src="/static/plugins/jquery/jquery-1.11.3.min.js"></script>
+<script>
+    $("form").submit(function () {
+        alert($(this).attr("action"));
+        alert(111)
+        return false;
+    })
+
+    $("#sendMailCode").click(function () {
+        var $sendCodeBtn = $("#sendCode");
+        $sendCodeBtn.text("已发送");
+        $("#sendSeconds").text("(60)");
+        var $this = $("#sendMailCode");
+        $this.addClass("send-code");
+        $this.attr("disabled", true);
+        var num = 60;
+        var i = setInterval(function () {
+            num--;
+            var $second = $("#sendSeconds");
+            $second.text("(" + num + ")");
+            if (num === 0) {
+                clearInterval(i);
+                $sendCodeBtn.text("重新发送");
+                $second.text("");
+                $this.removeClass("send-code");
+                $this.attr("disabled", false);
+            }
+        }, 1000);
+    });
+
+</script>
+</body>
+</html>

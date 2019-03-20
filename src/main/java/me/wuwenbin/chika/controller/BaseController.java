@@ -145,10 +145,10 @@ public abstract class BaseController {
         return "GET".equalsIgnoreCase(method);
     }
 
-    protected void setSessionUser(ChiKaUser user) {
-        getRequest().getSession().setAttribute(ChiKaConstant.SESSION_USER_KEY, user);
+    protected void setSessionUser(HttpServletRequest request, ChiKaUser user) {
+        request.getSession().setAttribute(ChiKaConstant.SESSION_USER_KEY, user);
         //30分钟
-        getRequest().getSession().setMaxInactiveInterval(30 * 60);
+        request.getSession().setMaxInactiveInterval(30 * 60);
     }
 
     protected ChiKaUser getSessionUser(HttpServletRequest request) {

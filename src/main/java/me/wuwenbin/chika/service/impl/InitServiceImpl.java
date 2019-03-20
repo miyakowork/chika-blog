@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -83,7 +83,7 @@ public class InitServiceImpl implements InitService {
                 .password(SecureUtil.md5(password))
                 .username(username)
                 .email(email)
-                .create(LocalDateTime.now())
+                .create(new Date())
                 .enable(ChikaValue.ENABLE.intVal())
                 .build();
         userDao.insertTemplate(initUser);

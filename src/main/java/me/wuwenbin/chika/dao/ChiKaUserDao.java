@@ -26,4 +26,12 @@ public interface ChiKaUserDao extends BaseMapper<ChiKaUser> {
      * @return
      */
     ChiKaUser findByQqOpenId(String openId, Boolean enable);
+
+    /**
+     * 统计nickname的数量
+     *
+     * @param nickname
+     * @return
+     */
+    int countNickname(String nickname);
 }

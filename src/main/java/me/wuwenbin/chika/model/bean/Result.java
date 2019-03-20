@@ -165,4 +165,15 @@ public class Result extends ConcurrentHashMap<String, Object> {
     public static <T> Result custom(int code, String message, T data) {
         return custom(code, message).put(DATA, data);
     }
+
+    /**
+     * 判断是否成功
+     *
+     * @param result
+     * @return
+     */
+    public static boolean isOk(Result result) {
+        return Integer.valueOf(result.get(CODE).toString()) == SUCCESS;
+    }
+
 }

@@ -17,7 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -74,7 +74,7 @@ public class SessionInterceptor extends BaseController implements HandlerInterce
                     .ipAddr(ipAddr)
                     .ipInfo(develop ? "开发中内网地址" : ChiKaKit.getIpInfo(ipAddr).getAddress())
                     .sessionId(request.getSession().getId())
-                    .time(LocalDateTime.now())
+                    .time(new Date())
                     .url(request.getRequestURL().toString())
                     .userAgent(request.getHeader("User-Agent"))
                     .username(username)

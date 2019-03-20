@@ -1,17 +1,18 @@
 package me.wuwenbin.chika.controller.login;
 
 import cn.hutool.crypto.SecureUtil;
-import com.google.code.kaptcha.Constants;
 import me.wuwenbin.chika.controller.BaseController;
 import me.wuwenbin.chika.dao.ChiKaParamDao;
 import me.wuwenbin.chika.model.bean.Result;
-import me.wuwenbin.chika.model.bean.login.QqLoginModel;
-import me.wuwenbin.chika.model.bean.login.SimpleLoginModel;
+import me.wuwenbin.chika.model.bean.login.QqLoginData;
+import me.wuwenbin.chika.model.bean.login.SimpleLoginData;
 import me.wuwenbin.chika.model.constant.ChiKaConstant;
 import me.wuwenbin.chika.model.constant.ChiKaKey;
+import me.wuwenbin.chika.model.constant.ChikaValue;
 import me.wuwenbin.chika.model.entity.ChiKaParam;
 import me.wuwenbin.chika.model.entity.ChiKaUser;
 import me.wuwenbin.chika.service.LoginService;
+import me.wuwenbin.chika.service.ParamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -31,22 +32,40 @@ public class LoginController extends BaseController {
 
     private final HttpServletRequest request;
     private final ChiKaParamDao paramDao;
-    private final LoginService<Result, SimpleLoginModel> simpleLoginService;
-    private final LoginService<Result, QqLoginModel> qqLoginService;
+    private final ParamService paramService;
+    private final LoginService<Result, SimpleLoginData> simpleLoginService;
+    private final LoginService<Result, QqLoginData> qqLoginService;
 
     @Autowired
     public LoginController(HttpServletRequest request,
-                           @Qualifier("simpleLoginService") LoginService<Result, SimpleLoginModel> simpleLoginService,
-                           @Qualifier("qqLoginService") LoginService<Result, QqLoginModel> qqLoginService, ChiKaParamDao paramDao) {
+                           @Qualifier("simpleLoginService") LoginService<Result, SimpleLoginData> simpleLoginService,
+                           @Qualifier("qqLoginService") LoginService<Result, QqLoginData> qqLoginService, ChiKaParamDao paramDao, ParamService paramService) {
         this.request = request;
         this.simpleLoginService = simpleLoginService;
         this.qqLoginService = qqLoginService;
         this.paramDao = paramDao;
+        this.paramService = paramService;
+    }
+
+
+    @GetMapping("/register")
+    public String register() {
+        return "register";
     }
 
     @GetMapping("/login")
     public String login() {
-        return "login";
+        ChiKaUser sessionUser = getSessionUser(request);
+        if (sessionUser != null) {
+            if (sessionUser.getRole() == ChiKaConstant.ROLE_ADMIN) {
+                return "redirect:" + ChikaValue.MANAGEMENT_INDEX;
+            } else {
+                return "redirect:" + ChikaValue.FRONTEND_INDEX;
+            }
+        } else {
+            request.setAttribute("isSetSendMailServer", paramService.isSetSendMailServer());
+            return "login";
+        }
     }
 
     @RequestMapping("/api/qq")
@@ -54,6 +73,7 @@ public class LoginController extends BaseController {
         String callbackDomain = basePath(request).concat("api/qqCallback");
         ChiKaParam appId = paramDao.findByName(ChiKaKey.QQ_APP_ID.key());
         if (appId == null || StringUtils.isEmpty(appId.getValue())) {
+            request.setAttribute("message", "未设置QQ登录相关参数！");
             return "redirect:/error?errorCode=404";
         } else {
             return "redirect:https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id="
@@ -64,9 +84,9 @@ public class LoginController extends BaseController {
     @RequestMapping("/api/qqCallback")
     public String qqCallback(HttpServletRequest request, String code) {
         String callbackDomain = basePath(request).concat("api/qqCallback");
-        Result r = qqLoginService.doLogin(QqLoginModel.builder().callbackDomain(callbackDomain).code(code).build());
+        Result r = qqLoginService.doLogin(QqLoginData.builder().callbackDomain(callbackDomain).code(code).build());
         if (r.get("code").equals(200)) {
-            setSessionUser((ChiKaUser) r.get(ChiKaConstant.SESSION_USER_KEY));
+            setSessionUser(request, (ChiKaUser) r.get(ChiKaConstant.SESSION_USER_KEY));
             return "redirect:" + r.get("data");
         } else {
             return "redirect:/error?errorCode=404";
@@ -75,20 +95,18 @@ public class LoginController extends BaseController {
 
     @PostMapping("/login")
     @ResponseBody
-    public Result login(SimpleLoginModel model) {
-        if (StringUtils.isEmpty(model.getChiKaCode())) {
-            return Result.error("验证码为空！");
+    public Result login(SimpleLoginData data) {
+        if (StringUtils.isEmpty(data.getChiKaUser()) || StringUtils.isEmpty(data.getChiKaPass())) {
+            return Result.error("邮箱/账号和密码不能为空！");
+        } else if (data.getChiKaUser().length() < 4 || data.getChiKaUser().length() > 20) {
+            return Result.error("账号不能过长或过短！");
+        } else if (data.getChiKaPass().length() < 6) {
+            return Result.error("密码填写不当！");
         } else {
-            String code = (String) request.getSession().getAttribute(Constants.KAPTCHA_SESSION_KEY);
-            if (code == null) {
-                return Result.custom(-1, "请刷新页面");
-            }
-            if (!code.equalsIgnoreCase(model.getChiKaCode())) {
-                return Result.error("验证码错误！");
-            }
+            data.setChiKaPass(SecureUtil.md5(data.getChiKaPass()));
+            data.setRequest(request);
+            return simpleLoginService.doLogin(data);
         }
-        model.setChiKaPass(SecureUtil.md5(model.getChiKaPass()));
-        return simpleLoginService.doLogin(model);
     }
 
     @GetMapping(value = {"/token/logout", "/management/logout"})

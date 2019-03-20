@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.beetl.sql.core.annotatoin.Table;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * created by Wuwenbin on 2019/3/13 at 13:17
@@ -28,5 +28,5 @@ public class ChiKaComment implements Serializable {
     private String ipCnAddr;
     private String userAgent;
     private Long userId;
-    private LocalDateTime post;
+    private Date post;
 }

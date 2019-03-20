@@ -16,7 +16,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class QqLoginModel implements Serializable {
+public class QqLoginData implements Serializable {
 
     private String callbackDomain;
     private String code;
