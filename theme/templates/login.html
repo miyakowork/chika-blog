@@ -38,49 +38,39 @@
 
         <div class="lowin-box lowin-register">
             <div class="lowin-box-inner">
-                <form>
-                    <p>Let's create your account</p>
-                    <div class="lowin-group">
-                        <label>Name</label>
-                        <input type="text" name="name" autocomplete="name" class="lowin-input">
-                    </div>
-                    <div class="lowin-group">
-                        <label>Email</label>
-                        <input type="email" autocomplete="email" name="email" class="lowin-input">
-                    </div>
-                    <div class="lowin-group">
-                        <label>Password</label>
-                        <input type="password" name="password" autocomplete="current-password" class="lowin-input">
-                    </div>
-                    <button class="lowin-btn">
-                        Sign Up
-                    </button>
-
-                    <div class="text-foot">
-                        Already have an account? <a href="" class="login-link">Login</a>
-                    </div>
-                </form>
+                <p>
+                    <a href="#"><img src="/static/assets/img/qq.png" style="width: 50px;"></a>
+                </p>
+                <p style="margin-top: 20px;">QQ 第三方注册</p>
+                <div class="text-foot">
+                    已有账号？ <a href="" class="login-link">点我登录</a>
+                </div>
             </div>
         </div>
     </div>
 
     <footer class="lowin-footer">
-        <p><i class="fa fa-graduation-cap"></i> 2018 <a href="https://github.com/miyakowork/noteblogv4" target="_blank">笔记博客&copy;
-            <span style="font-style: italic;">v4</span></a></p>
+        <p><i class="fa fa-graduation-cap"></i> 2019 <a href="https://github.com/miyakowork/noteblogv4" target="_blank">千夏博客&copy;</a></p>
         <p>
-            <span><a href="//wuwenbin.me" target="_blank">作者博客</a></span>
-            <span><a href="https://github.com/miyakowork/noteblogv4" target="_blank">获取源码</a></span>
+            <span><a href="//wuwenbin.me" target="_blank">作者博客</a></span>&nbsp;
+            <span><a href="https://github.com/miyakowork/noteblogv4" target="_blank">获取源码</a></span>&nbsp;
             <span><a href="//fly.layui.com/case/u/3425688" target="_blank">点赞作者</a></span>
         </p>
     </footer>
 </div>
-
+<script src="/static/plugins/jquery/jquery-1.11.3.min.js"></script>
 <script src="/static/assets/js/frontend/login.js"></script>
 <script>
     Auth.init({
-        login_url: '#login',
-        forgot_url: '#forgot'
+        login_url: '/#login',
+        forgot_url: '/#forgot'
     });
+
+    $("form").submit(function () {
+        alert($(this).attr("action"));
+        alert(111)
+        return false;
+    })
 </script>
 </body>
 </html>
