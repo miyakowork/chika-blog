@@ -7,4 +7,5 @@
 + 扩大搜索内容范围（包含文章、笔记、云文件、项目等），增加独立的搜索结果页面
 + IP地理位置查询接口改用太平洋网络的，淘宝的API会因为调用频率过高而导致500错误
 + 优化初始化流程和提示信息
++ 美化了登录/注册界面，增加了忘记密码的功能
 + 数据访问层由「[Spring Data JPA](https://spring.io/projects/spring-data-jpa)」改用「[BeetlSQL](http://ibeetl.com/guide/#beetlsql)」
