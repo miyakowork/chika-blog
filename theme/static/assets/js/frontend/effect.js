@@ -116,7 +116,7 @@ var Auth = {
         }
 
         Auth.vars.forgot_link.addEventListener("click", function (e) {
-            if (isSetSendMailServer) {
+            if (isOpenForgot) {
                 Auth.forgot(e);
             } else {
                 layer.alert("管理员未开放此功能！");

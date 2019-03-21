@@ -72,10 +72,11 @@
 <script src="/static/assets/js/frontend/effect.js"></script>
 <script src="/static/assets/js/frontend/login.js"></script>
 <script th:inline="javascript">
-    var isSetSendMailServer = [[${isSetSendMailServer}]];
+    var isOpenRegister = [[${isOpenRegister}]];
+    var isOpenForgot = [[${isOpenForgot}]];
 
     function doRegister() {
-        if (isSetSendMailServer) {
+        if (isOpenRegister) {
             location.href = "/register";
         } else {
             layer.msg("未开放邮箱注册，请使用第三方平台登录！");

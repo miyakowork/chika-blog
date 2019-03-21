@@ -63,7 +63,8 @@ public class LoginController extends BaseController {
                 return "redirect:" + ChikaValue.FRONTEND_INDEX;
             }
         } else {
-            request.setAttribute("isSetSendMailServer", paramService.isSetSendMailServer());
+            request.setAttribute("isOpenRegister", paramService.isSetSendMailServer());
+            request.setAttribute("isOpenForgot", paramService.isSetSendMailServer());
             return "login";
         }
     }
