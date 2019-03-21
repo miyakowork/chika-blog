@@ -13,6 +13,7 @@ import me.wuwenbin.chika.model.entity.ChiKaParam;
 import me.wuwenbin.chika.model.entity.ChiKaUser;
 import me.wuwenbin.chika.service.LoginService;
 import me.wuwenbin.chika.service.ParamService;
+import me.wuwenbin.chika.service.RegisterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -26,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * created by Wuwenbin on 2019/3/19 at 14:53
+ *
  * @author wuwenbin
  */
 @Controller
@@ -34,6 +36,7 @@ public class LoginController extends BaseController {
     private final HttpServletRequest request;
     private final ChiKaParamDao paramDao;
     private final ParamService paramService;
+    private final RegisterService registerService;
     private final LoginService<Result, SimpleLoginData> simpleLoginService;
     private final LoginService<Result, QqLoginData> qqLoginService;
 
@@ -42,12 +45,14 @@ public class LoginController extends BaseController {
                            @Qualifier("simpleLoginService") LoginService<Result, SimpleLoginData> simpleLoginService,
                            @Qualifier("qqLoginService") LoginService<Result, QqLoginData> qqLoginService,
                            ChiKaParamDao paramDao,
-                           ParamService paramService) {
+                           ParamService paramService,
+                           RegisterService registerService) {
         this.request = request;
         this.simpleLoginService = simpleLoginService;
         this.qqLoginService = qqLoginService;
         this.paramDao = paramDao;
         this.paramService = paramService;
+        this.registerService = registerService;
     }
 
 
@@ -56,6 +61,37 @@ public class LoginController extends BaseController {
         boolean isOpenRegister = paramService.isSetSendMailServer();
         return isOpenRegister ? "register" : "redirect:/";
     }
+
+    @PostMapping("/sendMailCode")
+    @ResponseBody
+    public Result sendMailCode(String email) {
+        try {
+            registerService.sendMailCode(email, request);
+            return Result.ok("发送成功，请在您的邮箱中查收！");
+        } catch (Exception e) {
+            return Result.error("发送验证码发生错误，错误信息：" + e.getMessage());
+        }
+    }
+
+    @PostMapping("/registration")
+    @ResponseBody
+    public Result doRegister(String chiKaUser, String chiKaPass, String mailCode, String nickname) {
+        int min = 4, minPass = 6, max = 20;
+        if (StringUtils.isEmpty(chiKaUser) || StringUtils.isEmpty(chiKaPass) || StringUtils.isEmpty(mailCode) || StringUtils.isEmpty(nickname)) {
+            return Result.error("所填信息不完整！");
+        } else if (chiKaUser.length() < min || chiKaUser.length() > max || chiKaPass.length() < minPass) {
+            return Result.error("所填信息不规范！");
+        } else {
+            String sessionMailCode = request.getSession().getAttribute(ChiKaConstant.MAIL_CODE_KEY).toString();
+            if (mailCode.equalsIgnoreCase(sessionMailCode)) {
+                registerService.userRegister(chiKaUser, chiKaPass, nickname);
+                return Result.ok("注册成功！", ChikaValue.LOGIN_URL);
+            } else {
+                return Result.error("注册失败！验证码错误");
+            }
+        }
+    }
+
 
     @GetMapping("/login")
     public String login() {

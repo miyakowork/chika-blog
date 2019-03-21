@@ -23,5 +23,10 @@ public interface ChiKaConstant {
      */
     String SESSION_USER_KEY = "chika_session_user_key";
 
+    /**
+     * 发送验证码的key
+     */
+    String MAIL_CODE_KEY = "sendMailCodeKey";
+
 
 }

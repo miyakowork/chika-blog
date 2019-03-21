@@ -41,13 +41,22 @@ layui.use(['jquery'], function () {
         }
         if (action === '/#forgot') {
             var ac = $("input[name=chiKaUser]").val();
-            if (ac.length >= 4 && ac.length <= 20) {
-                layer.prompt({title: '输入您邮箱收到的验证码', formType: 1}, function (pass, index) {
-                    layer.close(index);
+            var reEmail = /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/;
+            if (reEmail.test(ac)) {
+                $.post("/sendMailCode", {
+                    email: ac
+                }, function (resp) {
+                    layer.msg(resp.message);
+                    if (resp.code === ChiKa.status.ok) {
+                        layer.prompt({title: '输入您邮箱收到的验证码', formType: 1}, function (pass, index) {
+                            layer.close(index);
 
+                        });
+                    }
                 });
+
             } else {
-                layer.msg("邮箱/账号填写不正确！");
+                layer.msg("邮箱填写不正确！");
             }
         }
         return false;

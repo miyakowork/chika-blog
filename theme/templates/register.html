@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>千夏博客 - 注册</title>
+    <link rel="stylesheet" type="text/css" href="/static/plugins/layui/css/layui.css">
     <link rel="stylesheet" href="/static/assets/css/frontend/login.css" type="text/css">
 </head>
 
@@ -16,7 +17,7 @@
     <div class="lowin-wrapper">
         <div class="lowin-box lowin-login">
             <div class="lowin-box-inner">
-                <form>
+                <form method="post">
                     <p>注 册 账 号</p>
                     <div class="lowin-group">
                         <label>邮箱 <a href="#" class="login-back-link"></a></label>
@@ -28,9 +29,9 @@
                                placeholder="密码">
                     </div>
                     <div class="lowin-group password-group">
-                        <label>重复密码 </label>
-                        <input type="password" name="repeatPass" autocomplete="off" class="lowin-input"
-                               placeholder="重复密码">
+                        <label>昵称 </label>
+                        <input type="text" name="nickname" autocomplete="off" class="lowin-input"
+                               placeholder="昵称">
                     </div>
                     <div class="lowin-group password-group">
                         <label>邮箱验证码 </label>
@@ -63,34 +64,68 @@
         </p>
     </footer>
 </div>
+<script src="/static/plugins/md5/md5.min.js"></script>
+<script src="/static/plugins/layui/layui.all.js"></script>
 <script src="/static/plugins/jquery/jquery-1.11.3.min.js"></script>
-<script>
+<script th:inline="javascript">
+    var isOpenRegister = [[${isOpenRegister}]];
+    var reEmail = /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/;
     $("form").submit(function () {
-        alert($(this).attr("action"));
-        alert(111)
+        if (isOpenRegister) {
+            var email = $("input[name=_email]").val();
+            var pass = $("input[name=_password]").val();
+            var nickname = $("input[name=nickname]").val();
+            var code = $("input[name=mailCode]").val();
+            if (reEmail.test(email) && pass.length >= 6 && nickname.length > 0) {
+                $.post("/registration", {
+                    chiKaUser: email,
+                    chiKaPass: md5(pass),
+                    mailCode: code,
+                    nickname: nickname
+                }, function (resp) {
+                    layer.msg(resp.message);
+                    if (resp.code === ChiKa.status.ok) {
+                        setTimeout(function () {
+                            location.href = resp.data;
+                        }, 1000)
+                    }
+                })
+            }
+        }
         return false;
     })
 
     $("#sendMailCode").click(function () {
-        var $sendCodeBtn = $("#sendCode");
-        $sendCodeBtn.text("已发送");
-        $("#sendSeconds").text("(60)");
-        var $this = $("#sendMailCode");
-        $this.addClass("send-code");
-        $this.attr("disabled", true);
-        var num = 60;
-        var i = setInterval(function () {
-            num--;
-            var $second = $("#sendSeconds");
-            $second.text("(" + num + ")");
-            if (num === 0) {
-                clearInterval(i);
-                $sendCodeBtn.text("重新发送");
-                $second.text("");
-                $this.removeClass("send-code");
-                $this.attr("disabled", false);
-            }
-        }, 1000);
+        var email = $("input[name=_email]").val();
+        if (reEmail.test(email)) {
+            var $sendCodeBtn = $("#sendCode");
+            $sendCodeBtn.text("已发送");
+            $("#sendSeconds").text("(60)");
+            var $this = $("#sendMailCode");
+            $this.addClass("send-code");
+            $this.attr("disabled", true);
+            var num = 60;
+            var i = setInterval(function () {
+                num--;
+                var $second = $("#sendSeconds");
+                $second.text("(" + num + ")");
+                if (num === 0) {
+                    clearInterval(i);
+                    $sendCodeBtn.text("重新发送");
+                    $second.text("");
+                    $this.removeClass("send-code");
+                    $this.attr("disabled", false);
+                }
+            }, 1000);
+            $.post("/sendMailCode", {
+                email: email
+            }, function (resp) {
+                layer.msg(resp.message);
+            })
+        } else {
+            layer.msg("请正确填写邮箱！");
+        }
+
     });
 
 </script>
