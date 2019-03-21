@@ -50,7 +50,8 @@ public class LoginController extends BaseController {
 
     @GetMapping("/register")
     public String register() {
-        return "register";
+        boolean isOpenRegister = paramService.isSetSendMailServer();
+        return isOpenRegister ? "register" : "redirect:/";
     }
 
     @GetMapping("/login")
