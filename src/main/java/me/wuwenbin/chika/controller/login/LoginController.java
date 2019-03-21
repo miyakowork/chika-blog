@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * created by Wuwenbin on 2019/3/19 at 14:53
+ * @author wuwenbin
  */
 @Controller
 public class LoginController extends BaseController {
@@ -39,7 +40,9 @@ public class LoginController extends BaseController {
     @Autowired
     public LoginController(HttpServletRequest request,
                            @Qualifier("simpleLoginService") LoginService<Result, SimpleLoginData> simpleLoginService,
-                           @Qualifier("qqLoginService") LoginService<Result, QqLoginData> qqLoginService, ChiKaParamDao paramDao, ParamService paramService) {
+                           @Qualifier("qqLoginService") LoginService<Result, QqLoginData> qqLoginService,
+                           ChiKaParamDao paramDao,
+                           ParamService paramService) {
         this.request = request;
         this.simpleLoginService = simpleLoginService;
         this.qqLoginService = qqLoginService;
@@ -87,7 +90,7 @@ public class LoginController extends BaseController {
     public String qqCallback(HttpServletRequest request, String code) {
         String callbackDomain = basePath(request).concat("api/qqCallback");
         Result r = qqLoginService.doLogin(QqLoginData.builder().callbackDomain(callbackDomain).code(code).build());
-        if (r.get("code").equals(200)) {
+        if (r.get(Result.CODE).equals(Result.SUCCESS)) {
             setSessionUser(request, (ChiKaUser) r.get(ChiKaConstant.SESSION_USER_KEY));
             return "redirect:" + r.get("data");
         } else {
@@ -98,11 +101,14 @@ public class LoginController extends BaseController {
     @PostMapping("/login")
     @ResponseBody
     public Result login(SimpleLoginData data) {
+        int nameMin = 4;
+        int nameMax = 20;
+        int passMin = 6;
         if (StringUtils.isEmpty(data.getChiKaUser()) || StringUtils.isEmpty(data.getChiKaPass())) {
             return Result.error("邮箱/账号和密码不能为空！");
-        } else if (data.getChiKaUser().length() < 4 || data.getChiKaUser().length() > 20) {
+        } else if (data.getChiKaUser().length() < nameMin || data.getChiKaUser().length() > nameMax) {
             return Result.error("账号不能过长或过短！");
-        } else if (data.getChiKaPass().length() < 6) {
+        } else if (data.getChiKaPass().length() < passMin) {
             return Result.error("密码填写不当！");
         } else {
             data.setChiKaPass(SecureUtil.md5(data.getChiKaPass()));

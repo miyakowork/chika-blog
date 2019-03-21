@@ -15,12 +15,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Result extends ConcurrentHashMap<String, Object> {
 
-    private static final String CODE = "code";
-    private static final String MESSAGE = "message";
-    private static final String DATA = "data";
+    public static final String CODE = "code";
+    public static final String MESSAGE = "message";
+    public static final String DATA = "data";
 
-    private static final int SUCCESS = 200;
-    private static final int SERVER_ERROR = 500;
+    public static final int SUCCESS = 200;
+    public static final int SERVER_ERROR = 500;
 
     private Result() {
         put(CODE, SUCCESS);

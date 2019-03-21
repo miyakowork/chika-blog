@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * created by Wuwenbin on 2019/3/20 at 17:54
+ * @author wuwenbin
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -26,11 +27,13 @@ public class ParamServiceImpl implements ParamService {
     @Override
     public boolean isSetSendMailServer() {
         ChiKaParam account = paramDao.findByName(ChiKaKey.MAIL_SERVER_ACCOUNT.key());
+        ChiKaParam name = paramDao.findByName(ChiKaKey.MAIL_SENDER_NAME.key());
         ChiKaParam password = paramDao.findByName(ChiKaKey.MAIL_SERVER_PASSWORD.key());
         ChiKaParam stmpAddr = paramDao.findByName(ChiKaKey.MAIL_SMPT_SERVER_ADDR.key());
         ChiKaParam stmpPort = paramDao.findByName(ChiKaKey.MAIL_SMPT_SERVER_PORT.key());
         return StrUtil.isNotEmpty(account.getValue()) &&
                 StrUtil.isNotEmpty(password.getValue()) &&
+                StrUtil.isNotEmpty(name.getValue()) &&
                 StrUtil.isNotEmpty(stmpAddr.getValue()) &&
                 StrUtil.isNotEmpty(stmpPort.getValue());
     }
