@@ -36,9 +36,10 @@ public class ErrorController extends BaseController implements org.springframewo
     private ErrorAttributes errorAttributes;
     private ServerProperties serverProperties;
 
+
     @Override
     public String getErrorPath() {
-        return null;
+        return ERROR_PAGE;
     }
 
     public ErrorController(ErrorAttributes errorAttributes, ServerProperties serverProperties) {
@@ -55,7 +56,7 @@ public class ErrorController extends BaseController implements org.springframewo
      * @param response
      * @return
      */
-    @RequestMapping(produces = "text/html")
+    @RequestMapping(produces = TEXT_HTML_VALUE)
     public ModelAndView errorHtml(HttpServletRequest request, HttpServletResponse response) {
         HttpStatus status = getStatus(request);
         Map<String, Object> model = Collections.synchronizedMap(getErrorAttributes(request, isIncludeStackTrace(request)));

@@ -34,4 +34,21 @@ public interface ChiKaUserDao extends BaseMapper<ChiKaUser> {
      * @return
      */
     int countNickname(String nickname);
+
+    /**
+     * 统计邮箱和用户名的数量
+     *
+     * @param userParam
+     * @return
+     */
+    int countEmailAndUsername(String userParam);
+
+    /**
+     * 根据email账号更新密码
+     *
+     * @param password
+     * @param email
+     * @return
+     */
+    int updatePasswordByEmail(String password, String email);
 }

@@ -23,17 +23,19 @@ public class ThemeInterceptor extends BaseController implements HandlerIntercept
     }
 
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) {
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView mav) {
         if (!isAjaxRequest(request)) {
-            String view = modelAndView.getViewName();
-            ChiKaParam themeId = paramDao.findByName(ChiKaKey.THEME_ID.key());
-            String viewName;
-            if (StringUtils.isEmpty(themeId.getValue())) {
-                viewName = view;
-            } else {
-                viewName = themeId.getValue() + "/" + view;
+            if (mav != null && !mav.isEmpty() && mav.hasView()) {
+                String view = mav.getViewName();
+                ChiKaParam themeId = paramDao.findByName(ChiKaKey.THEME_ID.key());
+                String viewName;
+                if (StringUtils.isEmpty(themeId.getValue())) {
+                    viewName = view;
+                } else {
+                    viewName = themeId.getValue() + "/" + view;
+                }
+                mav.setViewName(viewName);
             }
-            modelAndView.setViewName(viewName);
         }
     }
 }

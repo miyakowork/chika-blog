@@ -7,5 +7,22 @@
 <body>
 111222
 <a href="/management/index">点我假装去后台</a>
+<button id="ajax">点我请求404ajax</button>
+<script src="/static/plugins/jquery/jquery-1.11.3.min.js"></script>
+<script>
+    $(function () {
+        $("#ajax").click(function () {
+            $.ajax({
+                url: "/test1",
+                success: function (data) {
+                    console.log(data)
+                },
+                error:function (data) {
+                    console.log(data)
+                }
+            })
+        })
+    })
+</script>
 </body>
 </html>

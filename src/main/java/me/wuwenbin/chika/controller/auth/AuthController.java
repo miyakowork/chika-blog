@@ -1,8 +1,10 @@
-package me.wuwenbin.chika.controller.login;
+package me.wuwenbin.chika.controller.auth;
 
+import cn.hutool.cache.Cache;
 import cn.hutool.crypto.SecureUtil;
 import me.wuwenbin.chika.controller.BaseController;
 import me.wuwenbin.chika.dao.ChiKaParamDao;
+import me.wuwenbin.chika.dao.ChiKaUserDao;
 import me.wuwenbin.chika.model.bean.Result;
 import me.wuwenbin.chika.model.bean.login.QqLoginData;
 import me.wuwenbin.chika.model.bean.login.SimpleLoginData;
@@ -11,9 +13,9 @@ import me.wuwenbin.chika.model.constant.ChiKaKey;
 import me.wuwenbin.chika.model.constant.ChikaValue;
 import me.wuwenbin.chika.model.entity.ChiKaParam;
 import me.wuwenbin.chika.model.entity.ChiKaUser;
+import me.wuwenbin.chika.service.AuthService;
 import me.wuwenbin.chika.service.LoginService;
 import me.wuwenbin.chika.service.ParamService;
-import me.wuwenbin.chika.service.RegisterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -31,34 +33,41 @@ import javax.servlet.http.HttpServletRequest;
  * @author wuwenbin
  */
 @Controller
-public class LoginController extends BaseController {
+public class AuthController extends BaseController {
 
     private final HttpServletRequest request;
     private final ChiKaParamDao paramDao;
+    private final ChiKaUserDao userDao;
     private final ParamService paramService;
-    private final RegisterService registerService;
+    private final AuthService authService;
     private final LoginService<Result, SimpleLoginData> simpleLoginService;
     private final LoginService<Result, QqLoginData> qqLoginService;
+    private final Cache<String, String> codeCache;
 
     @Autowired
-    public LoginController(HttpServletRequest request,
-                           @Qualifier("simpleLoginService") LoginService<Result, SimpleLoginData> simpleLoginService,
-                           @Qualifier("qqLoginService") LoginService<Result, QqLoginData> qqLoginService,
-                           ChiKaParamDao paramDao,
-                           ParamService paramService,
-                           RegisterService registerService) {
+    public AuthController(HttpServletRequest request,
+                          @Qualifier("simpleLoginService") LoginService<Result, SimpleLoginData> simpleLoginService,
+                          @Qualifier("qqLoginService") LoginService<Result, QqLoginData> qqLoginService,
+                          ChiKaParamDao paramDao,
+                          ParamService paramService,
+                          AuthService authService,
+                          Cache<String, String> codeCache,
+                          ChiKaUserDao userDao) {
         this.request = request;
         this.simpleLoginService = simpleLoginService;
         this.qqLoginService = qqLoginService;
         this.paramDao = paramDao;
         this.paramService = paramService;
-        this.registerService = registerService;
+        this.authService = authService;
+        this.codeCache = codeCache;
+        this.userDao = userDao;
     }
 
 
     @GetMapping("/register")
     public String register() {
         boolean isOpenRegister = paramService.isSetSendMailServer();
+        request.setAttribute("isOpenRegister", isOpenRegister);
         return isOpenRegister ? "register" : "redirect:/";
     }
 
@@ -66,11 +75,17 @@ public class LoginController extends BaseController {
     @ResponseBody
     public Result sendMailCode(String email) {
         try {
-            registerService.sendMailCode(email, request);
+            authService.sendMailCode(email);
             return Result.ok("发送成功，请在您的邮箱中查收！");
         } catch (Exception e) {
             return Result.error("发送验证码发生错误，错误信息：" + e.getMessage());
         }
+    }
+
+    @PostMapping("/reset")
+    @ResponseBody
+    public Result forgot(String email) {
+        return authService.resetPassword(email);
     }
 
     @PostMapping("/registration")
@@ -82,12 +97,16 @@ public class LoginController extends BaseController {
         } else if (chiKaUser.length() < min || chiKaUser.length() > max || chiKaPass.length() < minPass) {
             return Result.error("所填信息不规范！");
         } else {
-            String sessionMailCode = request.getSession().getAttribute(ChiKaConstant.MAIL_CODE_KEY).toString();
+            String sessionMailCode = codeCache.get(chiKaUser + "-" + ChiKaConstant.MAIL_CODE_KEY);
             if (mailCode.equalsIgnoreCase(sessionMailCode)) {
-                registerService.userRegister(chiKaUser, chiKaPass, nickname);
-                return Result.ok("注册成功！", ChikaValue.LOGIN_URL);
+                if (userDao.countEmailAndUsername(chiKaUser) == 0) {
+                    authService.userRegister(chiKaUser, chiKaPass, nickname);
+                    return Result.ok("注册成功！", ChikaValue.LOGIN_URL.strVal());
+                } else {
+                    return Result.error("已存在此邮箱，请勿重复注册！");
+                }
             } else {
-                return Result.error("注册失败！验证码错误");
+                return Result.error("注册失败，验证码错误或过期！");
             }
         }
     }
@@ -98,9 +117,9 @@ public class LoginController extends BaseController {
         ChiKaUser sessionUser = getSessionUser(request);
         if (sessionUser != null) {
             if (sessionUser.getRole() == ChiKaConstant.ROLE_ADMIN) {
-                return "redirect:" + ChikaValue.MANAGEMENT_INDEX;
+                return "redirect:" + ChikaValue.MANAGEMENT_INDEX.strVal();
             } else {
-                return "redirect:" + ChikaValue.FRONTEND_INDEX;
+                return "redirect:" + ChikaValue.FRONTEND_INDEX.strVal();
             }
         } else {
             request.setAttribute("isOpenRegister", paramService.isSetSendMailServer());

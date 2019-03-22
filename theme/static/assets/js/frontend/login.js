@@ -46,15 +46,22 @@ layui.use(['jquery'], function () {
                 $.post("/sendMailCode", {
                     email: ac
                 }, function (resp) {
-                    layer.msg(resp.message);
-                    if (resp.code === ChiKa.status.ok) {
-                        layer.prompt({title: '输入您邮箱收到的验证码', formType: 1}, function (pass, index) {
-                            layer.close(index);
-
-                        });
-                    }
+                    layer.msg(resp.message, function () {
+                        if (resp.code === ChiKa.status.ok) {
+                            layer.prompt({
+                                    title: '输入您邮箱收到的验证码',
+                                    formType: 3,
+                                    btn: ['重置密码', '取消']
+                                },
+                                function (value, index, elem) {
+                                    $.post('/reset', {email: ac}, function (resp) {
+                                        layer.close(index);
+                                        layer.msg(resp.message);
+                                    })
+                                });
+                        }
+                    });
                 });
-
             } else {
                 layer.msg("邮箱填写不正确！");
             }

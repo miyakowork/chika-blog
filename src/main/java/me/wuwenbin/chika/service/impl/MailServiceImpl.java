@@ -11,15 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.function.Consumer;
-
 /**
  * created by Wuwenbin on 2019-03-21 at 16:32
  *
  * @author wuwenbin
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
+@Transactional(rollbackFor = Exception.class, readOnly = true)
 public class MailServiceImpl implements MailService {
 
     private final ChiKaParamDao paramDao;
@@ -31,7 +29,7 @@ public class MailServiceImpl implements MailService {
 
 
     @Override
-    public <T> void sendMail(String subject, String targetMail, String content, boolean isHtml, Consumer<T> extraOperate, T t) {
+    public void sendMail(String subject, String targetMail, String content, boolean isHtml) {
         String host = paramDao.findByName(ChiKaKey.MAIL_SMPT_SERVER_ADDR.key()).getValue();
         String port = paramDao.findByName(ChiKaKey.MAIL_SMPT_SERVER_PORT.key()).getValue();
         String from = paramDao.findByName(ChiKaKey.MAIL_SERVER_ACCOUNT.key()).getValue();
@@ -55,7 +53,6 @@ public class MailServiceImpl implements MailService {
                     subject,
                     content,
                     isHtml);
-            extraOperate.accept(t);
         }
     }
 }

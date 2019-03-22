@@ -6,8 +6,12 @@ import com.google.code.kaptcha.Constants;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.google.code.kaptcha.util.Config;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.web.server.ErrorPage;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,10 +53,36 @@ public class BeanConfig {
 
     /**
      * 密码输入错误次数缓存
+     *
      * @return
      */
     @Bean
     public Cache<String, AtomicInteger> passwordRetryCache() {
         return CacheUtil.newTimedCache(10 * 60 * 1000);
     }
+
+    /**
+     * 验证码缓存，10分钟有效
+     *
+     * @return
+     */
+    @Bean
+    public Cache<String, String> mailCodeCache() {
+        return CacheUtil.newTimedCache(10 * 60 * 1000);
+    }
+
+
+    /**
+     * 添加全局拦截的error移除处理类
+     *
+     * @return
+     */
+    @Bean
+    public WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> containerCustomizer() {
+        return factory -> factory.addErrorPages(
+                new ErrorPage(HttpStatus.NOT_FOUND, "/error?errorCode=404"),
+                new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/error?errorCode=500"),
+                new ErrorPage(Throwable.class, "/error?errorCode=500"));
+    }
+
 }
