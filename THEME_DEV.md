@@ -5,6 +5,7 @@
 |:---:|:---:|
 |isOpenRegister|是否开放注册|
 |isOpenForgot|是否开放忘记密码功能|
+|isOpenQqLogin|是否开启QQ登录|
 + API  
     + QQ登录接口  
         + 请求URL：/api/qq  
@@ -26,4 +27,4 @@
                 "message": "登录成功！"
               }
             ```
-        
+    + 
