@@ -1,7 +1,11 @@
 package me.wuwenbin.chika.controller.auth;
 
 import cn.hutool.cache.Cache;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import me.wuwenbin.chika.controller.BaseController;
 import me.wuwenbin.chika.dao.ChiKaParamDao;
 import me.wuwenbin.chika.dao.ChiKaUserDao;
@@ -26,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * created by Wuwenbin on 2019/3/19 at 14:53
@@ -151,6 +157,36 @@ public class AuthController extends BaseController {
         } else {
             return "redirect:/error?errorCode=404";
         }
+    }
+
+    @RequestMapping("/api/github")
+    public String githubLogin() {
+        String callbackDomain = basePath(request).concat("api/githubCallback");
+        return "redirect:https://github.com/login/oauth/authorize?response_type=code&client_id="
+                + "2ecaad2a302d76470ab5" + "&redirect_uri=" + callbackDomain + "&state=6655";
+    }
+
+    @RequestMapping("/api/githubCallback")
+    public String githubCallback(HttpServletRequest request, String code) {
+        String callbackDomain = basePath(request).concat("api/githubCallback");
+        String url = "https://github.com/login/oauth/access_token";
+        Map<String, Object> pMap = new HashMap<>();
+        pMap.put("client_id", "2ecaad2a302d76470ab5");
+        pMap.put("client_secret", "de9da207effcdabe09279371e10c08a8c5af2b0d");
+        pMap.put("code", code);
+        pMap.put("redirect_uri", callbackDomain);
+        pMap.put("state", "6655");
+        String res = HttpUtil.post(url, pMap);
+        String accessToken = res.substring(13, res.indexOf("&scope"));
+        String userInfoUrl = "https://api.github.com/user?access_token={}";
+        userInfoUrl = StrUtil.format(userInfoUrl, accessToken);
+        String s = HttpUtil.get(userInfoUrl);
+       JSONObject jsonObject= JSONUtil.parseObj(s);
+       String username=jsonObject.getStr("login");
+       String email=jsonObject.getStr("email");
+       String avatar=jsonObject.getStr("avatar_url");
+       String nickname=jsonObject.getStr("name");
+        return "";
     }
 
     @PostMapping("/login")

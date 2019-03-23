@@ -15,6 +15,7 @@ table:
       `qq_open_id` varchar(255) DEFAULT NULL,\
       `username` varchar(20) DEFAULT NULL,\
       `wechat_open_id` varchar(255) DEFAULT NULL,\
+      `account_type` varchar(50) DEFAULT NULL COMMENT '账户类型，普通/qq/github/weixin等',\
       PRIMARY KEY (`id`)\
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\
     #系统日志表
