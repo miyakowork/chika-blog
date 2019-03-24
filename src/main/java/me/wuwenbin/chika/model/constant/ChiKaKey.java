@@ -98,6 +98,12 @@ public enum ChiKaKey {
     QQ_APP_KEY(StrUtil.EMPTY, LOW.intVal(), "QQ登录API APP KEY"),
 
     /**
+     * 第三方GITHUB登录API
+     */
+    GITHUB_CLIENT_ID(StrUtil.EMPTY, LOW.intVal(), "github登录API Client ID"),
+    GITHUB_CLIENT_SECRET(StrUtil.EMPTY, LOW.intVal(), "github登录API Client Secret"),
+
+    /**
      * 第三方七牛 API设置
      */
     QINIU_ACCESS_KEY(StrUtil.EMPTY, LOW.intVal(), "七牛上传 ACCESS KEY"),

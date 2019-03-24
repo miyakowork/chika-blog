@@ -5,7 +5,6 @@ import cn.hutool.json.JSONUtil;
 import me.wuwenbin.chika.controller.BaseController;
 import me.wuwenbin.chika.model.bean.Result;
 import me.wuwenbin.chika.model.constant.ChiKaConstant;
-import me.wuwenbin.chika.model.constant.ChikaValue;
 import me.wuwenbin.chika.model.entity.ChiKaUser;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -29,10 +28,10 @@ public class AdminInterceptor extends BaseController implements HandlerIntercept
         } else {
             if (isAjaxRequest(request)) {
                 JSONObject jsonObject = JSONUtil.createObj();
-                jsonObject.putAll(Result.error("非法访问，即将跳转首页！", ChikaValue.FRONTEND_INDEX.strVal()));
+                jsonObject.putAll(Result.error("非法访问，即将跳转首页！", ChiKaConstant.FRONTEND_INDEX));
                 response.getWriter().write(jsonObject.toString());
             } else {
-                response.sendRedirect(ChikaValue.FRONTEND_INDEX.strVal());
+                response.sendRedirect(ChiKaConstant.FRONTEND_INDEX);
             }
             return false;
         }

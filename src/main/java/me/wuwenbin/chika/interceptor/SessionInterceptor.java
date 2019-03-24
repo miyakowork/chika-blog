@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.wuwenbin.chika.controller.BaseController;
 import me.wuwenbin.chika.dao.ChiKaLoggerDao;
 import me.wuwenbin.chika.dao.ChiKaParamDao;
+import me.wuwenbin.chika.model.constant.ChiKaConstant;
 import me.wuwenbin.chika.model.constant.ChiKaKey;
 import me.wuwenbin.chika.model.constant.ChikaValue;
 import me.wuwenbin.chika.model.entity.ChiKaLogger;
@@ -36,7 +37,7 @@ public class SessionInterceptor extends BaseController implements HandlerInterce
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         ChiKaParam param = paramDao.findByName(ChiKaKey.SYSTEM_INIT_STATE.key());
         if (param == null || !ChikaValue.ENABLE.strVal().equals(param.getValue())) {
-            response.sendRedirect(ChikaValue.INIT_URL.strVal());
+            response.sendRedirect(ChiKaConstant.INIT_URL);
             return false;
         }
         return true;

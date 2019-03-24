@@ -50,6 +50,7 @@ public class AuthServiceImpl implements AuthService {
                 .nickname(nickname)
                 .enable(1)
                 .avatar("/static/assets/img/favicon.png")
+                .accountType(ChiKaConstant.TYPE_SIMPLE)
                 .build();
         userDao.insertTemplate(user);
     }

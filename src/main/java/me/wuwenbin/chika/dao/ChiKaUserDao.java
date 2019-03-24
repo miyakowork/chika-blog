@@ -51,4 +51,13 @@ public interface ChiKaUserDao extends BaseMapper<ChiKaUser> {
      * @return
      */
     int updatePasswordByEmail(String password, String email);
+
+    /**
+     * 查找github用户
+     *
+     * @param login
+     * @param enable
+     * @return
+     */
+    ChiKaUser findGithubUser(String login,boolean enable);
 }

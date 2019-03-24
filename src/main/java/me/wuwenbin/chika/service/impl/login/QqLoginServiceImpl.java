@@ -16,6 +16,7 @@ import me.wuwenbin.chika.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -69,7 +70,11 @@ public class QqLoginServiceImpl implements LoginService<Result, QqLoginData> {
                     int cnt = userDao.countNickname(nickname);
                     nickname = cnt > 0 ? nickname + new java.util.Date().getTime() : nickname;
                     String avatar = json2.getStr("figureurl_qq_2").replace("http://", "https://");
-                    ChiKaUser registerUser = ChiKaUser.builder().nickname(nickname).avatar(avatar).qqOpenId(openId).build();
+                    ChiKaUser registerUser = ChiKaUser.builder()
+                            .role(ChiKaConstant.ROLE_USER).create(new Date())
+                            .nickname(nickname).avatar(avatar).qqOpenId(openId)
+                            .accountType(ChiKaConstant.TYPE_QQ).enable(1)
+                            .build();
                     userDao.insertTemplate(registerUser, true);
                     if (registerUser.getId() != null) {
                         return Result.ok("授权成功！", "/").put(ChiKaConstant.SESSION_USER_KEY, registerUser);

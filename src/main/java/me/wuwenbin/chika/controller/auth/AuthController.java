@@ -1,20 +1,16 @@
 package me.wuwenbin.chika.controller.auth;
 
 import cn.hutool.cache.Cache;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import cn.hutool.http.HttpUtil;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import me.wuwenbin.chika.controller.BaseController;
 import me.wuwenbin.chika.dao.ChiKaParamDao;
 import me.wuwenbin.chika.dao.ChiKaUserDao;
 import me.wuwenbin.chika.model.bean.Result;
+import me.wuwenbin.chika.model.bean.login.GithubLoginData;
 import me.wuwenbin.chika.model.bean.login.QqLoginData;
 import me.wuwenbin.chika.model.bean.login.SimpleLoginData;
 import me.wuwenbin.chika.model.constant.ChiKaConstant;
 import me.wuwenbin.chika.model.constant.ChiKaKey;
-import me.wuwenbin.chika.model.constant.ChikaValue;
 import me.wuwenbin.chika.model.entity.ChiKaParam;
 import me.wuwenbin.chika.model.entity.ChiKaUser;
 import me.wuwenbin.chika.service.AuthService;
@@ -24,14 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * created by Wuwenbin on 2019/3/19 at 14:53
@@ -48,6 +39,7 @@ public class AuthController extends BaseController {
     private final AuthService authService;
     private final LoginService<Result, SimpleLoginData> simpleLoginService;
     private final LoginService<Result, QqLoginData> qqLoginService;
+    private final LoginService<Result, GithubLoginData> githubLoginService;
     private final Cache<String, String> codeCache;
 
     @Autowired
@@ -58,7 +50,8 @@ public class AuthController extends BaseController {
                           ParamService paramService,
                           AuthService authService,
                           Cache<String, String> codeCache,
-                          ChiKaUserDao userDao) {
+                          ChiKaUserDao userDao,
+                          @Qualifier("githubLoginService") LoginService<Result, GithubLoginData> githubLoginService) {
         this.request = request;
         this.simpleLoginService = simpleLoginService;
         this.qqLoginService = qqLoginService;
@@ -67,6 +60,7 @@ public class AuthController extends BaseController {
         this.authService = authService;
         this.codeCache = codeCache;
         this.userDao = userDao;
+        this.githubLoginService = githubLoginService;
     }
 
 
@@ -107,7 +101,7 @@ public class AuthController extends BaseController {
             if (mailCode.equalsIgnoreCase(sessionMailCode)) {
                 if (userDao.countEmailAndUsername(chiKaUser) == 0) {
                     authService.userRegister(chiKaUser, chiKaPass, nickname);
-                    return Result.ok("注册成功！", ChikaValue.LOGIN_URL.strVal());
+                    return Result.ok("注册成功！", ChiKaConstant.LOGIN_URL);
                 } else {
                     return Result.error("已存在此邮箱，请勿重复注册！");
                 }
@@ -123,9 +117,9 @@ public class AuthController extends BaseController {
         ChiKaUser sessionUser = getSessionUser(request);
         if (sessionUser != null) {
             if (sessionUser.getRole() == ChiKaConstant.ROLE_ADMIN) {
-                return "redirect:" + ChikaValue.MANAGEMENT_INDEX.strVal();
+                return "redirect:" + ChiKaConstant.MANAGEMENT_INDEX;
             } else {
-                return "redirect:" + ChikaValue.FRONTEND_INDEX.strVal();
+                return "redirect:" + ChiKaConstant.FRONTEND_INDEX;
             }
         } else {
             request.setAttribute("isOpenRegister", paramService.isSetSendMailServer());
@@ -147,47 +141,41 @@ public class AuthController extends BaseController {
         }
     }
 
-    @RequestMapping("/api/qqCallback")
-    public String qqCallback(HttpServletRequest request, String code) {
-        String callbackDomain = basePath(request).concat("api/qqCallback");
-        Result r = qqLoginService.doLogin(QqLoginData.builder().callbackDomain(callbackDomain).code(code).build());
+    @RequestMapping("/api/github")
+    public String githubLogin() {
+        String callbackDomain = basePath(request).concat("api/githubCallback");
+        ChiKaParam githubClientId = paramDao.findByName(ChiKaKey.GITHUB_CLIENT_ID.key());
+        if (githubClientId == null || StringUtils.isEmpty(githubClientId.getValue())) {
+            request.setAttribute("message", "未设置GITHUB登录相关参数！");
+            return "redirect:/error?errorCode=404";
+        } else {
+            return "redirect:https://github.com/login/oauth/authorize?response_type=code&client_id="
+                    + githubClientId.getValue() + "&redirect_uri=" + callbackDomain + "&state=" + ChiKaConstant.GITHUB_AUTH_STATE;
+        }
+    }
+
+
+    @RequestMapping("/api/{callbackType}")
+    public String qqCallback(HttpServletRequest request, String code, @PathVariable("callbackType") String callbackType) {
+        String qq = "qqCallback", github = "githubCallback";
+        Result r;
+        if (qq.equals(callbackType)) {
+            String callbackDomain = basePath(request).concat("api/qqCallback");
+            r = qqLoginService.doLogin(QqLoginData.builder().callbackDomain(callbackDomain).code(code).build());
+        } else if (github.equals(callbackType)) {
+            String callbackDomain = basePath(request).concat("api/githubCallback");
+            r = githubLoginService.doLogin(GithubLoginData.builder().callbackDomain(callbackDomain).code(code).build());
+        } else {
+            return "redirect:/error?errorCode=404";
+        }
         if (r.get(Result.CODE).equals(Result.SUCCESS)) {
             setSessionUser(request, (ChiKaUser) r.get(ChiKaConstant.SESSION_USER_KEY));
-            return "redirect:" + r.get("data");
+            return "redirect:" + r.get(Result.DATA);
         } else {
             return "redirect:/error?errorCode=404";
         }
     }
 
-    @RequestMapping("/api/github")
-    public String githubLogin() {
-        String callbackDomain = basePath(request).concat("api/githubCallback");
-        return "redirect:https://github.com/login/oauth/authorize?response_type=code&client_id="
-                + "2ecaad2a302d76470ab5" + "&redirect_uri=" + callbackDomain + "&state=6655";
-    }
-
-    @RequestMapping("/api/githubCallback")
-    public String githubCallback(HttpServletRequest request, String code) {
-        String callbackDomain = basePath(request).concat("api/githubCallback");
-        String url = "https://github.com/login/oauth/access_token";
-        Map<String, Object> pMap = new HashMap<>();
-        pMap.put("client_id", "2ecaad2a302d76470ab5");
-        pMap.put("client_secret", "de9da207effcdabe09279371e10c08a8c5af2b0d");
-        pMap.put("code", code);
-        pMap.put("redirect_uri", callbackDomain);
-        pMap.put("state", "6655");
-        String res = HttpUtil.post(url, pMap);
-        String accessToken = res.substring(13, res.indexOf("&scope"));
-        String userInfoUrl = "https://api.github.com/user?access_token={}";
-        userInfoUrl = StrUtil.format(userInfoUrl, accessToken);
-        String s = HttpUtil.get(userInfoUrl);
-       JSONObject jsonObject= JSONUtil.parseObj(s);
-       String username=jsonObject.getStr("login");
-       String email=jsonObject.getStr("email");
-       String avatar=jsonObject.getStr("avatar_url");
-       String nickname=jsonObject.getStr("name");
-        return "";
-    }
 
     @PostMapping("/login")
     @ResponseBody

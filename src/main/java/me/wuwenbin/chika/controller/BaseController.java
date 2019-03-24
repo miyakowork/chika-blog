@@ -5,7 +5,6 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import me.wuwenbin.chika.model.bean.Result;
 import me.wuwenbin.chika.model.constant.ChiKaConstant;
-import me.wuwenbin.chika.model.constant.ChikaValue;
 import me.wuwenbin.chika.model.entity.ChiKaUser;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -80,14 +79,14 @@ public abstract class BaseController {
         response.setCharacterEncoding("UTF-8");
         if (isRouter(request)) {
             JSONObject jsonObject = JSONUtil.createObj();
-            jsonObject.putAll(Result.custom(-1, message, ChikaValue.LOGIN_URL.strVal()));
+            jsonObject.putAll(Result.custom(-1, message, ChiKaConstant.LOGIN_URL));
             response.getWriter().write(jsonObject.toString());
         } else if (isAjaxRequest(request) && !isRouter(request)) {
             JSONObject jsonObject = JSONUtil.createObj();
-            jsonObject.putAll(Result.custom(-1, message, ChikaValue.LOGIN_URL.strVal()));
+            jsonObject.putAll(Result.custom(-1, message,ChiKaConstant.LOGIN_URL));
             response.getWriter().write(jsonObject.toString());
         } else {
-            response.sendRedirect(ChikaValue.LOGIN_URL.strVal());
+            response.sendRedirect(ChiKaConstant.LOGIN_URL);
         }
     }
 

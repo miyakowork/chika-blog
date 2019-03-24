@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh_CN">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <body>
-111222
+111222---
 <a href="/management/index">点我假装去后台</a>
+<a th:if="${su!=null}" href="/token/logout">退出</a>
 <button id="ajax">点我请求404ajax</button>
 <script src="/static/plugins/jquery/jquery-1.11.3.min.js"></script>
-<script>
+<script th:inline="javascript">
     $(function () {
         $("#ajax").click(function () {
             $.ajax({
@@ -17,7 +18,7 @@
                 success: function (data) {
                     console.log(data)
                 },
-                error:function (data) {
+                error: function (data) {
                     console.log(data)
                 }
             })

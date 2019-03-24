@@ -39,17 +39,34 @@
             </div>
         </div>
 
-        <div class="lowin-box lowin-register">
+        <div class="lowin-box lowin-register" style="display: none;">
 
             <div class="lowin-box-inner">
                 <p style="margin-top: 20px;">第三方注册／登录</p>
-                <p id="fromQqLogin">
-                    <a href="/api/qq" onclick="layer.msg('正在通过QQ登入', {icon:16, shade: 0.1, time:0})"
-                       style="border: none;"><img src="/static/assets/img/qq.png" style="width: 50px;"
-                                                  alt="qq"></a>
-                    <a href="/api/github">github</a>
-                </p>
-                <p style="margin-top: 20px;" id="fromQqLoginTxt">QQ</p>
+                <div class="layui-row">
+                    <div class="layui-col-xs6">
+                        <p>
+                            <a id="fromQqLogin" href="/api/qq"
+                               onclick="layer.msg('正在通过QQ登入', {icon:16, shade: 0.1, time:0})"
+                               style="border: none;"><img src="/static/assets/img/qq.png" style="width: 50px;"
+                                                          alt="qq"></a>
+                        </p>
+                        <p style="margin-top: 20px;">
+                            <span id="fromQqLoginTxt">QQ</span></p>
+                    </div>
+                    <div class="layui-col-xs6">
+                        <p style="margin-top: -5px;">
+                            <a id="fromGithubLogin" href="/api/github"
+                               onclick="layer.msg('正在通过GITHUB登入', {icon:16, shade: 0.1, time:0})"
+                               style="border: none;"><img src="/static/assets/img/github.png" style="width: 55px;"
+                                                          alt="github"></a>
+                        </p>
+                        <p>
+                            <span id="fromGithubLoginTxt">GITHUB</span>
+                        </p>
+                    </div>
+                </div>
+
                 <div class="text-foot">
                     已有账号？ <a href="" class="login-link">点我登录</a>
                 </div>
@@ -73,6 +90,10 @@
 <script src="/static/assets/js/frontend/effect.js"></script>
 <script src="/static/assets/js/frontend/login.js"></script>
 <script th:inline="javascript">
+    var isIE = ChiKa.browser.versions.trident;
+    if (isIE) {
+        alert("请使用【Chrome（或Chrome内核）／FireFox／Safari】等现代浏览器访问以获得最佳体验！");
+    }
     var isOpenRegister = [[${isOpenRegister}]];
     var isOpenForgot = [[${isOpenForgot}]];
 

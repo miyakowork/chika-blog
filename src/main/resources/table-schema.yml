@@ -11,10 +11,8 @@ table:
       `enable` tinyint(1) NOT NULL,\
       `nickname` varchar(50) DEFAULT NULL,\
       `password` varchar(255) DEFAULT NULL,\
-      `qq_num` varchar(20) DEFAULT NULL,\
       `qq_open_id` varchar(255) DEFAULT NULL,\
       `username` varchar(20) DEFAULT NULL,\
-      `wechat_open_id` varchar(255) DEFAULT NULL,\
       `account_type` varchar(50) DEFAULT NULL COMMENT '账户类型，普通/qq/github/weixin等',\
       PRIMARY KEY (`id`)\
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\

@@ -82,5 +82,16 @@ layui.use(['jquery'], function () {
         });
     });
 
-})
-;
+
+    $("#fromGithubLogin").hover(function () {
+        $("#fromGithubLoginTxt").css({
+            "font-weight": "bolder",
+            "color": "#ff6464"
+        });
+    }, function () {
+        $("#fromGithubLoginTxt").css({
+            "font-weight": "normal",
+            "color": "#ff64648c"
+        });
+    });
+});

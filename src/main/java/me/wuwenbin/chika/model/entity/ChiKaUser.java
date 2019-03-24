@@ -29,9 +29,8 @@ public class ChiKaUser implements Serializable {
     private String email;
     private String nickname;
     private String password;
-    private String qqNum;
     private String qqOpenId;
     private String username;
-    private String wechatOpenId;
     private Date create;
+    private String accountType;
 }

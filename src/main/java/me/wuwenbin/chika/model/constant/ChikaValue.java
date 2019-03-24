@@ -39,15 +39,6 @@ public enum ChikaValue {
     LOWER(-200),
     LOWEST(-300),
 
-    /**
-     * 网站一些页面的映射url地址
-     */
-    INIT_URL("/init"),
-    LOGIN_URL("/login"),
-    FRONTEND_INDEX("/"),
-    MANAGEMENT_INDEX("/management/index"),
-    ERROR_PAGE("/error/page"),
-    ERROR_ROUTER("/error/router"),
 
     /**
      * 文件相关值

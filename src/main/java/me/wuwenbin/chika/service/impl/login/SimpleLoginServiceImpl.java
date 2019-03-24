@@ -5,7 +5,6 @@ import me.wuwenbin.chika.dao.ChiKaUserDao;
 import me.wuwenbin.chika.model.bean.Result;
 import me.wuwenbin.chika.model.bean.login.SimpleLoginData;
 import me.wuwenbin.chika.model.constant.ChiKaConstant;
-import me.wuwenbin.chika.model.constant.ChikaValue;
 import me.wuwenbin.chika.model.entity.ChiKaUser;
 import me.wuwenbin.chika.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,9 +52,9 @@ public class SimpleLoginServiceImpl implements LoginService<Result, SimpleLoginD
             //clear retry count
             passwordRetryCache.remove(username);
             if (role == ChiKaConstant.ROLE_ADMIN) {
-                return Result.ok(successText, ChikaValue.MANAGEMENT_INDEX.strVal());
+                return Result.ok(successText, ChiKaConstant.MANAGEMENT_INDEX);
             } else {
-                return Result.ok(successText, ChikaValue.FRONTEND_INDEX.strVal());
+                return Result.ok(successText, ChiKaConstant.FRONTEND_INDEX);
             }
         } else {
             return Result.error("用户不存在或密码错误或被锁定！");

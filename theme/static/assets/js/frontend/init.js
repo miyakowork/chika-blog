@@ -38,7 +38,13 @@ layui.use('form', function () {
         , mail: [
             /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((.[a-zA-Z0-9_-]{2,3}){1,2})$/
             , '请输入正确的邮箱！'
-        ]
+        ],
+        qiniu: function (value) {
+            var uploadType = $("select[name=upload_type]").val();
+            if ("qiniu_server" === uploadType && (value === null || value.length === 0)) {
+                return "选择七牛服务器必须填写相关参数！";
+            }
+        }
     });
 
     $("#next").on('click', function () {
