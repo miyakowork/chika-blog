@@ -156,7 +156,7 @@ public class AuthController extends BaseController {
 
 
     @RequestMapping("/api/{callbackType}")
-    public String qqCallback(HttpServletRequest request, String code, @PathVariable("callbackType") String callbackType) {
+    public String qqCallback(String code, @PathVariable("callbackType") String callbackType) {
         String qq = "qqCallback", github = "githubCallback";
         Result r;
         if (qq.equals(callbackType)) {
@@ -166,6 +166,7 @@ public class AuthController extends BaseController {
             String callbackDomain = basePath(request).concat("api/githubCallback");
             r = githubLoginService.doLogin(GithubLoginData.builder().callbackDomain(callbackDomain).code(code).build());
         } else {
+            request.setAttribute("message", "暂未支持其他类型的登录！");
             return "redirect:/error?errorCode=404";
         }
         if (r.get(Result.CODE).equals(Result.SUCCESS)) {
