@@ -1,29 +1,15 @@
 <!DOCTYPE html>
 <html lang="zh_CN">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="keywords" content="keywords">
+    <meta name="description" content="description">
+    <link href="/static/plugins/diquick/diquick.css" type="text/css" rel="stylesheet">
     <title>Title</title>
 </head>
 <body>
-111222---
-<a href="/management/index">点我假装去后台</a>
-<a th:if="${su!=null}" href="/token/logout">退出</a>
-<button id="ajax">点我请求404ajax</button>
-<script src="/static/plugins/jquery/jquery-1.11.3.min.js"></script>
-<script th:inline="javascript">
-    $(function () {
-        $("#ajax").click(function () {
-            $.ajax({
-                url: "/test1",
-                success: function (data) {
-                    console.log(data)
-                },
-                error: function (data) {
-                    console.log(data)
-                }
-            })
-        })
-    })
-</script>
+
+<script src="/static/plugins/diquick/diquick.js"></script>
 </body>
 </html>
