@@ -1,5 +1,6 @@
 package me.wuwenbin.chika.interceptor;
 
+import cn.hutool.core.util.StrUtil;
 import me.wuwenbin.chika.controller.BaseController;
 import me.wuwenbin.chika.dao.ChiKaParamDao;
 import me.wuwenbin.chika.model.constant.ChiKaKey;
@@ -29,7 +30,10 @@ public class ThemeInterceptor extends BaseController implements HandlerIntercept
                 String view = mav.getViewName();
                 ChiKaParam themeId = paramDao.findByName(ChiKaKey.THEME_ID.key());
                 String viewName;
-                if (StringUtils.isEmpty(themeId.getValue())) {
+                ChiKaParam homeThemeUrl = paramDao.findByName(ChiKaKey.THEME_HOMEPAGE_ONOFF.key());
+                if ("/".equals(request.getRequestURI())) {
+                    viewName = StrUtil.isNotEmpty(homeThemeUrl.getValue()) ? "homepage/" + view : view;
+                } else if (StringUtils.isEmpty(themeId.getValue())) {
                     viewName = view;
                 } else {
                     viewName = themeId.getValue() + "/" + view;

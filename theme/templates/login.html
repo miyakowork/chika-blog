@@ -46,7 +46,7 @@
                 <div class="layui-row">
                     <div class="layui-col-xs6">
                         <p>
-                            <a id="fromQqLogin" href="/api/qq"
+                            <a id="fromQqLogin" href="javascript:doQqLogin();"
                                onclick="layer.msg('正在通过QQ登入', {icon:16, shade: 0.1, time:0})"
                                style="border: none;"><img src="/static/assets/img/qq.png" style="width: 50px;"
                                                           alt="qq"></a>
@@ -56,7 +56,7 @@
                     </div>
                     <div class="layui-col-xs6">
                         <p style="margin-top: -5px;">
-                            <a id="fromGithubLogin" href="/api/github"
+                            <a id="fromGithubLogin" href="javascript:doGithubLogin();"
                                onclick="layer.msg('正在通过GITHUB登入', {icon:16, shade: 0.1, time:0})"
                                style="border: none;"><img src="/static/assets/img/github.png" style="width: 55px;"
                                                           alt="github"></a>
@@ -96,6 +96,8 @@
     }
     var isOpenRegister = [[${isOpenRegister}]];
     var isOpenForgot = [[${isOpenForgot}]];
+    var isOpenQqLogin = [[${isOpenQqLogin}]];
+    var isOpenGithubLogin = [[${isOpenGithubLogin}]];
 
     function doRegister() {
         if (isOpenRegister) {
@@ -105,6 +107,21 @@
         }
     }
 
+    function doQqLogin() {
+        if (isOpenQqLogin) {
+            location.href = "/api/qq";
+        } else {
+            layer.msg("未开方法参数QQ登录！");
+        }
+    }
+
+    function doGithubLogin() {
+        if (isOpenGithubLogin) {
+            location.href = "/api/github";
+        } else {
+            layer.msg("未开放Github登录！");
+        }
+    }
 </script>
 </body>
 </html>

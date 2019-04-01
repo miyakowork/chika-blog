@@ -1,6 +1,7 @@
 package me.wuwenbin.chika.controller.auth;
 
 import cn.hutool.cache.Cache;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import me.wuwenbin.chika.controller.BaseController;
 import me.wuwenbin.chika.dao.ChiKaParamDao;
@@ -122,8 +123,14 @@ public class AuthController extends BaseController {
                 return "redirect:" + ChiKaConstant.FRONTEND_INDEX;
             }
         } else {
+            ChiKaParam appId = paramDao.findByName(ChiKaKey.QQ_APP_ID.key());
+            ChiKaParam githubClientId = paramDao.findByName(ChiKaKey.GITHUB_CLIENT_ID.key());
             request.setAttribute("isOpenRegister", paramService.isSetSendMailServer());
             request.setAttribute("isOpenForgot", paramService.isSetSendMailServer());
+            request.setAttribute("isOpenQqLogin",
+                    (appId != null && StrUtil.isNotEmpty(appId.getValue())));
+            request.setAttribute("isOpenGithubLogin",
+                    (githubClientId != null && StrUtil.isNotEmpty(githubClientId.getValue())));
             return "login";
         }
     }
@@ -133,8 +140,8 @@ public class AuthController extends BaseController {
         String callbackDomain = basePath(request).concat("api/qqCallback");
         ChiKaParam appId = paramDao.findByName(ChiKaKey.QQ_APP_ID.key());
         if (appId == null || StringUtils.isEmpty(appId.getValue())) {
-            request.setAttribute("message", "未设置QQ登录相关参数！");
-            return "redirect:/error?errorCode=404";
+            request.getSession().setAttribute("errorMessage", "未设置QQ登录相关参数！");
+            return "redirect:/error?errorCode=403";
         } else {
             return "redirect:https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id="
                     + appId.getValue() + "&redirect_uri=" + callbackDomain + "&state=" + System.currentTimeMillis();
@@ -146,8 +153,8 @@ public class AuthController extends BaseController {
         String callbackDomain = basePath(request).concat("api/githubCallback");
         ChiKaParam githubClientId = paramDao.findByName(ChiKaKey.GITHUB_CLIENT_ID.key());
         if (githubClientId == null || StringUtils.isEmpty(githubClientId.getValue())) {
-            request.setAttribute("message", "未设置GITHUB登录相关参数！");
-            return "redirect:/error?errorCode=404";
+            request.getSession().setAttribute("errorMessage", "未设置GITHUB登录相关参数！");
+            return "redirect:/error?errorCode=403";
         } else {
             return "redirect:https://github.com/login/oauth/authorize?response_type=code&client_id="
                     + githubClientId.getValue() + "&redirect_uri=" + callbackDomain + "&state=" + ChiKaConstant.GITHUB_AUTH_STATE;

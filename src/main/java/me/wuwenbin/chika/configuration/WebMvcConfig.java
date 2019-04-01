@@ -55,9 +55,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         List<String> excludePaths = Arrays.asList("/static/**", "/error/**", "/init/**");
         List<String> excludePaths2 = Arrays.asList("/api/qq", "/api/qqCallback", "/api/github", "/api/githubCallback");
-        registry.addInterceptor(new SessionInterceptor(paramDao)).addPathPatterns("/**").excludePathPatterns(excludePaths);
+        String excludePath3 = "/management/**";
+        registry.addInterceptor(new SessionInterceptor(paramDao)).addPathPatterns("/**")
+                .excludePathPatterns(excludePaths);
         registry.addInterceptor(new TokenInterceptor()).addPathPatterns("/token/**");
         registry.addInterceptor(new AdminInterceptor()).addPathPatterns("/management/**");
-        registry.addInterceptor(new ThemeInterceptor(paramDao)).addPathPatterns("/**").excludePathPatterns(excludePaths).excludePathPatterns(excludePaths2);
+        registry.addInterceptor(new ThemeInterceptor(paramDao)).addPathPatterns("/**")
+                .excludePathPatterns(excludePaths).excludePathPatterns(excludePaths2)
+                .excludePathPatterns(excludePath3);
     }
 }

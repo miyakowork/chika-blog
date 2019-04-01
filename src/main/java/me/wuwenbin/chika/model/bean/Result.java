@@ -20,6 +20,7 @@ public class Result extends ConcurrentHashMap<String, Object> {
     public static final String DATA = "data";
 
     public static final int SUCCESS = 200;
+    public static final int LOGIN_INVALID = -1;
     public static final int SERVER_ERROR = 500;
 
     private Result() {

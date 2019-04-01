@@ -63,6 +63,8 @@ public class ErrorController extends BaseController implements org.springframewo
         response.setStatus(status.value());
         model.put("status", status.value());
         String template = isRouter(request) ? ERROR_ROUTER : ERROR_PAGE;
+        model.put("message", request.getSession().getAttribute("errorMessage"));
+        request.getSession().removeAttribute("errorMessage");
         return new ModelAndView(template, model);
     }
 

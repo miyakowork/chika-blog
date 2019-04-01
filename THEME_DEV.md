@@ -9,6 +9,7 @@
 |isOpenRegister|是否开放注册|
 |isOpenForgot|是否开放忘记密码功能|
 |isOpenQqLogin|是否开启QQ登录|
+|isOpenGithubLogin|是否开启QQ登录|
 + 包含的API接口
     + QQ登录接口  
         + 请求URL：/api/qq  

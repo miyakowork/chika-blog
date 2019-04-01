@@ -79,11 +79,11 @@ public abstract class BaseController {
         response.setCharacterEncoding("UTF-8");
         if (isRouter(request)) {
             JSONObject jsonObject = JSONUtil.createObj();
-            jsonObject.putAll(Result.custom(-1, message, ChiKaConstant.LOGIN_URL));
+            jsonObject.putAll(Result.custom(Result.LOGIN_INVALID, message, ChiKaConstant.LOGIN_URL));
             response.getWriter().write(jsonObject.toString());
         } else if (isAjaxRequest(request) && !isRouter(request)) {
             JSONObject jsonObject = JSONUtil.createObj();
-            jsonObject.putAll(Result.custom(-1, message,ChiKaConstant.LOGIN_URL));
+            jsonObject.putAll(Result.custom(Result.LOGIN_INVALID, message, ChiKaConstant.LOGIN_URL));
             response.getWriter().write(jsonObject.toString());
         } else {
             response.sendRedirect(ChiKaConstant.LOGIN_URL);

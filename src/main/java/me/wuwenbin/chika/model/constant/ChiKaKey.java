@@ -127,6 +127,7 @@ public enum ChiKaKey {
      * 文章摘要文字长度、
      * 博文首页分页的pageSize大小、
      * 使用主题名称/ID
+     * 是否有注定的访问首页主题（默认为空，即访问默认的博客主题首页）
      * 上传类型（七牛还是本地）
      */
     INFO_LABEL_CONTENT(ChikaValue.INFO_LABEL_CONTENT.val(), MID.intVal(), "信息板内容"),
@@ -135,6 +136,7 @@ public enum ChiKaKey {
     COMMENT_LENGTH(ChikaValue.COMMENT_LENGTH.val(), MID.intVal(), "评论文字长度"),
     THEME_NAME(DEFAULT_THEME_NAME.val(), HIGHEST.intVal(), "使用的主题名字"),
     THEME_ID(DEFAULT_THEME_ID.val(), HIGHEST.intVal(), "使用的主题的唯一编号id"),
+    THEME_HOMEPAGE_ONOFF(StrUtil.EMPTY, HIGHEST.intVal(), "使用的主题的默认首页url"),
     UPLOAD_TYPE(LOCAL_SERVER.val(), HIGHEST.intVal(), "文件上传方式"),
 
     /**
