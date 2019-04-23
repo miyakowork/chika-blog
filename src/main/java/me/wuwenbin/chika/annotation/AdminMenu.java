@@ -21,7 +21,7 @@ public @interface AdminMenu {
 
     /**
      * 属于哪一组
-     * class为任意自定义的类都可，但是必须在类上注解
+     * class为任意自定义的类都可，但是必须在类上注解{@link GroupName}
      *
      * @return
      */
