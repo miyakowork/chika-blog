@@ -4,8 +4,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import me.wuwenbin.chika.model.bean.Result;
-import me.wuwenbin.chika.model.constant.ChiKaConstant;
-import me.wuwenbin.chika.model.entity.ChiKaUser;
+import me.wuwenbin.chika.model.constant.CKConstant;
+import me.wuwenbin.chika.model.entity.CKUser;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -79,14 +79,14 @@ public abstract class BaseController {
         response.setCharacterEncoding("UTF-8");
         if (isRouter(request)) {
             JSONObject jsonObject = JSONUtil.createObj();
-            jsonObject.putAll(Result.custom(Result.LOGIN_INVALID, message, ChiKaConstant.LOGIN_URL));
+            jsonObject.putAll(Result.custom(Result.LOGIN_INVALID, message, CKConstant.LOGIN_URL));
             response.getWriter().write(jsonObject.toString());
         } else if (isAjaxRequest(request) && !isRouter(request)) {
             JSONObject jsonObject = JSONUtil.createObj();
-            jsonObject.putAll(Result.custom(Result.LOGIN_INVALID, message, ChiKaConstant.LOGIN_URL));
+            jsonObject.putAll(Result.custom(Result.LOGIN_INVALID, message, CKConstant.LOGIN_URL));
             response.getWriter().write(jsonObject.toString());
         } else {
-            response.sendRedirect(ChiKaConstant.LOGIN_URL);
+            response.sendRedirect(CKConstant.LOGIN_URL);
         }
     }
 
@@ -144,18 +144,18 @@ public abstract class BaseController {
         return "GET".equalsIgnoreCase(method);
     }
 
-    protected void setSessionUser(HttpServletRequest request, ChiKaUser user) {
-        request.getSession().setAttribute(ChiKaConstant.SESSION_USER_KEY, user);
+    protected void setSessionUser(HttpServletRequest request, CKUser user) {
+        request.getSession().setAttribute(CKConstant.SESSION_USER_KEY, user);
         //30分钟
         request.getSession().setMaxInactiveInterval(30 * 60);
     }
 
-    protected ChiKaUser getSessionUser(HttpServletRequest request) {
-        return (ChiKaUser) request.getSession().getAttribute(ChiKaConstant.SESSION_USER_KEY);
+    protected CKUser getSessionUser(HttpServletRequest request) {
+        return (CKUser) request.getSession().getAttribute(CKConstant.SESSION_USER_KEY);
     }
 
     protected void invalidSessionUser(HttpServletRequest request) {
-        request.getSession().removeAttribute(ChiKaConstant.SESSION_USER_KEY);
+        request.getSession().removeAttribute(CKConstant.SESSION_USER_KEY);
         request.getSession().invalidate();
     }
 }

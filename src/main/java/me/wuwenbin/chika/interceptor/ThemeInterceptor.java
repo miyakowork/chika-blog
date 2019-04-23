@@ -2,9 +2,9 @@ package me.wuwenbin.chika.interceptor;
 
 import cn.hutool.core.util.StrUtil;
 import me.wuwenbin.chika.controller.BaseController;
-import me.wuwenbin.chika.dao.ChiKaParamDao;
-import me.wuwenbin.chika.model.constant.ChiKaKey;
-import me.wuwenbin.chika.model.entity.ChiKaParam;
+import me.wuwenbin.chika.model.constant.CKKey;
+import me.wuwenbin.chika.model.entity.CKParam;
+import me.wuwenbin.chika.service.ParamService;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -17,10 +17,10 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ThemeInterceptor extends BaseController implements HandlerInterceptor {
 
-    private ChiKaParamDao paramDao;
+    private ParamService paramService;
 
-    public ThemeInterceptor(ChiKaParamDao paramDao) {
-        this.paramDao = paramDao;
+    public ThemeInterceptor(ParamService paramService) {
+        this.paramService = paramService;
     }
 
     @Override
@@ -28,9 +28,9 @@ public class ThemeInterceptor extends BaseController implements HandlerIntercept
         if (!isAjaxRequest(request)) {
             if (mav != null && !mav.isEmpty() && mav.hasView()) {
                 String view = mav.getViewName();
-                ChiKaParam themeId = paramDao.findByName(ChiKaKey.THEME_ID.key());
+                CKParam themeId = paramService.findByName(CKKey.THEME_ID.key());
                 String viewName;
-                ChiKaParam homeThemeUrl = paramDao.findByName(ChiKaKey.THEME_HOMEPAGE_ONOFF.key());
+                CKParam homeThemeUrl = paramService.findByName(CKKey.THEME_HOMEPAGE_ONOFF.key());
                 if ("/".equals(request.getRequestURI())) {
                     viewName = StrUtil.isNotEmpty(homeThemeUrl.getValue()) ? "homepage/" + view : view;
                 } else if (StringUtils.isEmpty(themeId.getValue())) {

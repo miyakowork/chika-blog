@@ -3,15 +3,15 @@ package me.wuwenbin.chika.interceptor;
 import cn.hutool.core.map.MapUtil;
 import lombok.extern.slf4j.Slf4j;
 import me.wuwenbin.chika.controller.BaseController;
-import me.wuwenbin.chika.dao.ChiKaLoggerDao;
-import me.wuwenbin.chika.dao.ChiKaParamDao;
-import me.wuwenbin.chika.model.constant.ChiKaConstant;
-import me.wuwenbin.chika.model.constant.ChiKaKey;
-import me.wuwenbin.chika.model.constant.ChikaValue;
-import me.wuwenbin.chika.model.entity.ChiKaLogger;
-import me.wuwenbin.chika.model.entity.ChiKaParam;
-import me.wuwenbin.chika.model.entity.ChiKaUser;
-import me.wuwenbin.chika.util.ChiKaKit;
+import me.wuwenbin.chika.model.constant.CKConstant;
+import me.wuwenbin.chika.model.constant.CKKey;
+import me.wuwenbin.chika.model.constant.CKValue;
+import me.wuwenbin.chika.model.entity.CKLogger;
+import me.wuwenbin.chika.model.entity.CKParam;
+import me.wuwenbin.chika.model.entity.CKUser;
+import me.wuwenbin.chika.service.ParamService;
+import me.wuwenbin.chika.util.CKUtils;
+import me.wuwenbin.data.jdbc.ancestor.AncestorDao;
 import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -27,27 +27,27 @@ import java.util.Map;
 @Slf4j
 public class SessionInterceptor extends BaseController implements HandlerInterceptor {
 
-    private ChiKaParamDao paramDao;
+    private ParamService paramService;
 
-    public SessionInterceptor(ChiKaParamDao paramDao) {
-        this.paramDao = paramDao;
+    public SessionInterceptor(ParamService paramService) {
+        this.paramService = paramService;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        ChiKaParam param = paramDao.findByName(ChiKaKey.SYSTEM_INIT_STATE.key());
-        if (param == null || !ChikaValue.ENABLE.strVal().equals(param.getValue())) {
-            response.sendRedirect(ChiKaConstant.INIT_URL);
+        CKParam param = paramService.findByName(CKKey.SYSTEM_INIT_STATE.key());
+        if (param == null || !CKValue.ENABLE.strVal().equals(param.getValue())) {
+            response.sendRedirect(CKConstant.INIT_URL);
             return false;
         }
         return true;
     }
 
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView mv) {
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView mv) throws Exception {
         String username = "";
         if (mv != null) {
-            ChiKaUser user = getSessionUser(request);
+            CKUser user = getSessionUser(request);
             if (user == null) {
                 //sessionUser为空
                 mv.getModelMap().addAttribute("su", null);
@@ -65,15 +65,15 @@ public class SessionInterceptor extends BaseController implements HandlerInterce
         }
 
         final String key = "chika.develop";
-        boolean develop = ChiKaKit.getBean(Environment.class).getProperty(key, Boolean.class, true);
+        boolean develop = CKUtils.getBean(Environment.class).getProperty(key, Boolean.class, true);
 
         String ipAddr = getRemoteAddress(request);
-        String res = paramDao.findByName(ChiKaKey.STATISTIC_ANALYSIS_ONOFF.key()).getValue();
-        boolean openAnalysis = Integer.valueOf(res) == ChikaValue.ENABLE.intVal();
+        String res = paramService.findByName(CKKey.STATISTIC_ANALYSIS_ONOFF.key()).getValue();
+        boolean openAnalysis = Integer.valueOf(res) == CKValue.ENABLE.intVal();
         if (openAnalysis) {
-            ChiKaLogger logger = ChiKaLogger.builder()
+            CKLogger logger = CKLogger.builder()
                     .ipAddr(ipAddr)
-                    .ipInfo(develop ? "开发中内网地址" : ChiKaKit.getIpInfo(ipAddr).getAddress())
+                    .ipInfo(develop ? "开发中内网地址" : CKUtils.getIpInfo(ipAddr).getAddress())
                     .sessionId(request.getSession().getId())
                     .time(new Date())
                     .url(request.getRequestURL().toString())
@@ -82,7 +82,9 @@ public class SessionInterceptor extends BaseController implements HandlerInterce
                     .requestMethod(request.getMethod())
                     .contentType(request.getContentType())
                     .build();
-            ChiKaKit.getBean(ChiKaLoggerDao.class).insertTemplate(logger);
+            String sql = "insert into(ip_addr,ip_info,session_id,time,url,user_agent,username,request_method,content_type)" +
+                    "values(:ipAddr,:ipInfo,:sessionId,:time,:url,:userAgent,:username,:requestMethod,:contentType)";
+            CKUtils.getBean(AncestorDao.class).executeBean(sql, logger);
         }
     }
 }

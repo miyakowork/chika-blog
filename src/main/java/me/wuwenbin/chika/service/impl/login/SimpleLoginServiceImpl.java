@@ -1,11 +1,11 @@
 package me.wuwenbin.chika.service.impl.login;
 
 import cn.hutool.cache.Cache;
-import me.wuwenbin.chika.dao.ChiKaUserDao;
 import me.wuwenbin.chika.model.bean.Result;
 import me.wuwenbin.chika.model.bean.login.SimpleLoginData;
-import me.wuwenbin.chika.model.constant.ChiKaConstant;
-import me.wuwenbin.chika.model.entity.ChiKaUser;
+import me.wuwenbin.chika.model.constant.CKConstant;
+import me.wuwenbin.chika.model.entity.CKUser;
+import me.wuwenbin.chika.service.AuthService;
 import me.wuwenbin.chika.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,12 +20,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Transactional(rollbackFor = Exception.class)
 public class SimpleLoginServiceImpl implements LoginService<Result, SimpleLoginData> {
 
-    private final ChiKaUserDao userDao;
+    private final AuthService authService;
     private final Cache<String, AtomicInteger> passwordRetryCache;
 
     @Autowired
-    public SimpleLoginServiceImpl(ChiKaUserDao userDao, Cache<String, AtomicInteger> passwordRetryCache) {
-        this.userDao = userDao;
+    public SimpleLoginServiceImpl(AuthService authService, Cache<String, AtomicInteger> passwordRetryCache) {
+        this.authService = authService;
         this.passwordRetryCache = passwordRetryCache;
     }
 
@@ -43,18 +43,18 @@ public class SimpleLoginServiceImpl implements LoginService<Result, SimpleLoginD
             //if retry count > 5 throw
             return Result.error("密码输入错误次数过多");
         }
-        ChiKaUser loginUser = userDao.findLoginUser(username, data.getChiKaPass());
+        CKUser loginUser = authService.findLoginUser(username, data.getChiKaPass());
         if (loginUser != null) {
             int role = loginUser.getRole();
             String successText = "登录成功！";
-            data.getRequest().getSession().setAttribute(ChiKaConstant.SESSION_USER_KEY, loginUser);
+            data.getRequest().getSession().setAttribute(CKConstant.SESSION_USER_KEY, loginUser);
             data.getRequest().getSession().setMaxInactiveInterval(30 * 60);
             //clear retry count
             passwordRetryCache.remove(username);
-            if (role == ChiKaConstant.ROLE_ADMIN) {
-                return Result.ok(successText, ChiKaConstant.MANAGEMENT_INDEX);
+            if (role == CKConstant.ROLE_ADMIN) {
+                return Result.ok(successText, CKConstant.MANAGEMENT_INDEX);
             } else {
-                return Result.ok(successText, ChiKaConstant.FRONTEND_INDEX);
+                return Result.ok(successText, CKConstant.FRONTEND_INDEX);
             }
         } else {
             return Result.error("用户不存在或密码错误或被锁定！");

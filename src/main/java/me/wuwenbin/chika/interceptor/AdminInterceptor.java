@@ -4,8 +4,8 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import me.wuwenbin.chika.controller.BaseController;
 import me.wuwenbin.chika.model.bean.Result;
-import me.wuwenbin.chika.model.constant.ChiKaConstant;
-import me.wuwenbin.chika.model.entity.ChiKaUser;
+import me.wuwenbin.chika.model.constant.CKConstant;
+import me.wuwenbin.chika.model.entity.CKUser;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,19 +19,19 @@ public class AdminInterceptor extends BaseController implements HandlerIntercept
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        ChiKaUser sessionUser = getSessionUser(request);
+        CKUser sessionUser = getSessionUser(request);
         if (sessionUser == null) {
             handleAjaxRequest(request, response);
             return false;
-        } else if (sessionUser.getRole() == ChiKaConstant.ROLE_ADMIN) {
+        } else if (sessionUser.getRole() == CKConstant.ROLE_ADMIN) {
             return true;
         } else {
             if (isAjaxRequest(request)) {
                 JSONObject jsonObject = JSONUtil.createObj();
-                jsonObject.putAll(Result.error("非法访问，即将跳转首页！", ChiKaConstant.FRONTEND_INDEX));
+                jsonObject.putAll(Result.error("非法访问，即将跳转首页！", CKConstant.FRONTEND_INDEX));
                 response.getWriter().write(jsonObject.toString());
             } else {
-                response.sendRedirect(ChiKaConstant.FRONTEND_INDEX);
+                response.sendRedirect(CKConstant.FRONTEND_INDEX);
             }
             return false;
         }

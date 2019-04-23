@@ -5,15 +5,15 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
-import me.wuwenbin.chika.dao.ChiKaParamDao;
-import me.wuwenbin.chika.dao.ChiKaUserDao;
 import me.wuwenbin.chika.model.bean.Result;
 import me.wuwenbin.chika.model.bean.login.GithubLoginData;
-import me.wuwenbin.chika.model.constant.ChiKaConstant;
-import me.wuwenbin.chika.model.constant.ChiKaKey;
-import me.wuwenbin.chika.model.entity.ChiKaParam;
-import me.wuwenbin.chika.model.entity.ChiKaUser;
+import me.wuwenbin.chika.model.constant.CKConstant;
+import me.wuwenbin.chika.model.constant.CKKey;
+import me.wuwenbin.chika.model.entity.CKParam;
+import me.wuwenbin.chika.model.entity.CKUser;
+import me.wuwenbin.chika.service.AuthService;
 import me.wuwenbin.chika.service.LoginService;
+import me.wuwenbin.chika.service.ParamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,23 +28,23 @@ import java.util.Map;
 @Service("githubLoginService")
 public class GithubLoginServiceImpl implements LoginService<Result, GithubLoginData> {
 
-    private final ChiKaParamDao paramDao;
-    private final ChiKaUserDao userDao;
+    private final ParamService paramService;
+    @Autowired
+    private AuthService authService;
 
     @Autowired
-    public GithubLoginServiceImpl(ChiKaParamDao paramDao, ChiKaUserDao userDao) {
-        this.paramDao = paramDao;
-        this.userDao = userDao;
+    public GithubLoginServiceImpl(ParamService paramService) {
+        this.paramService = paramService;
     }
 
     @Override
     public Result doLogin(GithubLoginData data) {
         try {
-            ChiKaParam githubClientId = paramDao.findByName(ChiKaKey.GITHUB_CLIENT_ID.key());
-            ChiKaParam githubClientSecret = paramDao.findByName(ChiKaKey.GITHUB_CLIENT_SECRET.key());
+            CKParam githubClientId = paramService.findByName(CKKey.GITHUB_CLIENT_ID.key());
+            CKParam githubClientSecret = paramService.findByName(CKKey.GITHUB_CLIENT_SECRET.key());
             String accessTokenUrl = "https://github.com/login/oauth/access_token";
             Map<String, Object> accessTokenUrlParam = new HashMap<>();
-            accessTokenUrlParam.put("state", ChiKaConstant.GITHUB_AUTH_STATE);
+            accessTokenUrlParam.put("state", CKConstant.GITHUB_AUTH_STATE);
             accessTokenUrlParam.put("code", data.getCode());
             accessTokenUrlParam.put("client_id", githubClientId.getValue());
             accessTokenUrlParam.put("client_secret", githubClientSecret.getValue());
@@ -56,30 +56,34 @@ public class GithubLoginServiceImpl implements LoginService<Result, GithubLoginD
             String userInfoResult = HttpUtil.get(userInfoUrl);
             JSONObject jsonObject = JSONUtil.parseObj(userInfoResult);
             String login = jsonObject.getStr("login");
-            ChiKaUser githubUser = userDao.findGithubUser(login, true);
+            String findGithubUserSql = "select * from chika_user where account_type=? and username = ? and enable = ?";
+            CKUser githubUser = baseDao().findBeanByArray(findGithubUserSql, CKUser.class, "github", login, true);
             if (githubUser != null) {
-                return Result.ok("授权成功！", "/").put(ChiKaConstant.SESSION_USER_KEY, githubUser);
+                return Result.ok("授权成功！", "/").put(CKConstant.SESSION_USER_KEY, githubUser);
             } else {
-                ChiKaUser lockedUser = userDao.findGithubUser(login, false);
+                CKUser lockedUser = baseDao().findBeanByArray(findGithubUserSql, CKUser.class, "github", login, false);
                 if (lockedUser != null) {
                     return Result.error("GITHUB登录授权失败，原因：用户已被锁定！");
                 }
                 String email = jsonObject.getStr("email");
                 String avatar = jsonObject.getStr("avatar_url");
                 String nickname = jsonObject.getStr("name");
-                int cnt = userDao.countNickname(nickname);
+                int cnt = authService.countNickname(nickname);
                 nickname = cnt > 0 ? nickname + new java.util.Date().getTime() : nickname;
-                ChiKaUser registerUser = ChiKaUser.builder()
-                        .role(ChiKaConstant.ROLE_USER).create(new Date())
+                CKUser registerUser = CKUser.builder()
+                        .role(CKConstant.ROLE_USER).create(new Date())
                         .nickname(nickname).avatar(avatar).username(login)
-                        .accountType(ChiKaConstant.TYPE_GITHUB).enable(1)
+                        .accountType(CKConstant.TYPE_GITHUB).enable(1)
                         .build();
                 if (StrUtil.isNotEmpty(email)) {
                     registerUser.setEmail(email);
                 }
-                userDao.insertTemplate(registerUser, true);
-                if (registerUser.getId() != null) {
-                    return Result.ok("授权成功！", ChiKaConstant.FRONTEND_INDEX).put(ChiKaConstant.SESSION_USER_KEY, registerUser);
+                String registerUserSql = "insert into chika_user(role,`create`,nickname,avatar,username,account_type,enable) values(?,?,?,?,?,?,?)";
+                int ru = baseDao().executeArray(registerUserSql,
+                        CKConstant.ROLE_USER, new Date(), nickname,
+                        avatar, login, CKConstant.TYPE_GITHUB, 1);
+                if (ru == 1) {
+                    return Result.ok("授权成功！", CKConstant.FRONTEND_INDEX).put(CKConstant.SESSION_USER_KEY, registerUser);
                 } else {
                     return Result.error("GITHUB授权失败，原因：注册失败！");
                 }

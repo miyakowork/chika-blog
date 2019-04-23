@@ -9,20 +9,21 @@ import lombok.extern.slf4j.Slf4j;
 import me.wuwenbin.chika.annotation.AdminMenu;
 import me.wuwenbin.chika.annotation.GroupName;
 import me.wuwenbin.chika.configuration.TableConfig;
-import me.wuwenbin.chika.dao.ChiKaParamDao;
 import me.wuwenbin.chika.exception.PropertyErrorException;
 import me.wuwenbin.chika.model.bean.Menu;
+import me.wuwenbin.chika.model.constant.CKConstant;
+import me.wuwenbin.chika.model.constant.CKKey;
+import me.wuwenbin.chika.model.constant.CKValue;
 import me.wuwenbin.chika.model.constant.CateType;
-import me.wuwenbin.chika.model.constant.ChiKaConstant;
-import me.wuwenbin.chika.model.constant.ChiKaKey;
-import me.wuwenbin.chika.model.constant.ChikaValue;
-import me.wuwenbin.chika.model.entity.ChiKaArticle;
-import me.wuwenbin.chika.model.entity.ChiKaCate;
-import me.wuwenbin.chika.model.entity.ChiKaParam;
-import me.wuwenbin.chika.model.entity.ChiKaUser;
-import me.wuwenbin.chika.util.ChiKaKit;
-import org.beetl.sql.core.SQLManager;
-import org.beetl.sql.core.SQLReady;
+import me.wuwenbin.chika.model.entity.CKArticle;
+import me.wuwenbin.chika.model.entity.CKCate;
+import me.wuwenbin.chika.model.entity.CKParam;
+import me.wuwenbin.chika.model.entity.CKUser;
+import me.wuwenbin.chika.service.ArticleService;
+import me.wuwenbin.chika.service.CateService;
+import me.wuwenbin.chika.service.ParamService;
+import me.wuwenbin.chika.util.CKUtils;
+import me.wuwenbin.data.jdbc.ancestor.AncestorDao;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.system.ApplicationHome;
@@ -57,18 +58,22 @@ public class InitializationListener implements ApplicationListener<ContextRefres
 
     private final JdbcTemplate jdbcTemplate;
     private final TableConfig tableConfig;
-    private final SQLManager sqlManager;
-    private final ChiKaParamDao paramDao;
+    private final ParamService paramService;
+    private final CateService cateService;
+    private final ArticleService articleService;
+    private final AncestorDao dao;
     private final Environment env;
 
     @Autowired
     public InitializationListener(JdbcTemplate jdbcTemplate, TableConfig tableConfig,
-                                  SQLManager sqlManager, ChiKaParamDao paramDao, Environment env) {
+                                  ParamService paramService, Environment env, AncestorDao dao, CateService cateService, ArticleService articleService) {
         this.jdbcTemplate = jdbcTemplate;
         this.tableConfig = tableConfig;
-        this.sqlManager = sqlManager;
-        this.paramDao = paramDao;
+        this.paramService = paramService;
         this.env = env;
+        this.dao = dao;
+        this.cateService = cateService;
+        this.articleService = articleService;
     }
 
 
@@ -84,10 +89,10 @@ public class InitializationListener implements ApplicationListener<ContextRefres
             if (!file.exists() || failedFile.exists()) {
                 initDBTableSchema();
                 log.info("「千夏博客」正在检测初始化环境，请稍后...");
-                ChiKaParam count = ChiKaParam.builder().name(ChiKaKey.SYSTEM_INIT_STATE.key()).build();
-                long cnt = sqlManager.templateCount(count);
-                ChiKaParam param = paramDao.findByName(ChiKaKey.SYSTEM_INIT_STATE.key());
-                if (cnt == 0 || !ChikaValue.ENABLE.val().equals(param.getValue())) {
+                String hasSystemInitStateProp = "select count(1) from chika_param where name = ?";
+                long cnt = dao.queryNumberByArray(hasSystemInitStateProp, Integer.class, CKKey.SYSTEM_INIT_STATE.key());
+                CKParam param = paramService.findByName(CKKey.SYSTEM_INIT_STATE.key());
+                if (cnt == 0 || !CKValue.ENABLE.val().equals(param.getValue())) {
                     log.info("「千夏博客」开始初始化，请稍后...");
                     truncateAllaTables();
                     setUpParams();
@@ -124,7 +129,7 @@ public class InitializationListener implements ApplicationListener<ContextRefres
         for (Field field : fields) {
             Object executeSql = ReflectUtil.getFieldValue(tableConfig, field);
             String dropSql = "DROP TABLE IF EXISTS `{}`;";
-            String tableName = ChiKaKit.camel2Underline(field.getName());
+            String tableName = CKUtils.camel2Underline(field.getName());
             jdbcTemplate.execute(StrUtil.format(dropSql, tableName));
             log.info("正在创建表「{}」，SQL：「{}」", tableName, executeSql);
             jdbcTemplate.execute(executeSql.toString());
@@ -138,7 +143,7 @@ public class InitializationListener implements ApplicationListener<ContextRefres
     private void truncateAllaTables() {
         Field[] fields = ReflectUtil.getFields(TableConfig.class);
         for (Field field : fields) {
-            String tableName = ChiKaKit.camel2Underline(field.getName());
+            String tableName = CKUtils.camel2Underline(field.getName());
             String truncateSql = "TRUNCATE {}";
             jdbcTemplate.execute(StrUtil.format(truncateSql, tableName));
         }
@@ -147,17 +152,17 @@ public class InitializationListener implements ApplicationListener<ContextRefres
     /**
      * 系统参数表的一些默认值插入
      */
-    private void setUpParams() {
+    private void setUpParams() throws Exception {
         log.info("「千夏博客」正在初始化系统参数，请稍后...");
-        ChiKaKey[] chiKaKeys = ChiKaKey.values();
-        for (ChiKaKey chiKaKey : chiKaKeys) {
-            ChiKaParam p = ChiKaParam.builder()
+        CKKey[] chiKaKeys = CKKey.values();
+        for (CKKey chiKaKey : chiKaKeys) {
+            CKParam p = CKParam.builder()
                     .name(chiKaKey.key())
                     .level(chiKaKey.getLevel())
                     .remark(chiKaKey.getDesc())
                     .value(chiKaKey.getVal())
                     .build();
-            paramDao.insertTemplate(p);
+            paramService.insertParam(p);
         }
         log.info("「千夏博客」初始化系统参数完毕，准备进行下一步...");
     }
@@ -167,10 +172,10 @@ public class InitializationListener implements ApplicationListener<ContextRefres
      */
     private void setUpUpload() {
         log.info("「千夏博客」正在初始化文件上传目录，请稍后...");
-        ChiKaParam param = paramDao.findByName(ChiKaKey.UPLOAD_TYPE.key());
+        CKParam param = paramService.findByName(CKKey.UPLOAD_TYPE.key());
         String value = param.getValue();
-        if (ChikaValue.LOCAL_SERVER.strVal().equalsIgnoreCase(value)) {
-            String path = env.getProperty(ChiKaConstant.UPLOAD_PATH_KEY);
+        if (CKValue.LOCAL_SERVER.strVal().equalsIgnoreCase(value)) {
+            String path = env.getProperty(CKConstant.UPLOAD_PATH_KEY);
             if (!StringUtils.isEmpty(path)) {
                 log.info("「千夏博客」文件上传目录设置为：「{}」", path);
                 path = path.replace("file:", "");
@@ -202,34 +207,31 @@ public class InitializationListener implements ApplicationListener<ContextRefres
     /**
      * 设置系统欢迎内容
      */
-    private void setUpHelloWorld() {
+    private void setUpHelloWorld() throws Exception {
         log.info("「千夏博客」正在初始化基本内容，请稍后...");
-        ChiKaCate cate = ChiKaCate.builder()
+        CKCate cate = CKCate.builder()
                 .cnName("默认分类")
                 .name("def_cate")
                 .fontIcon("fa fa-sliders")
                 .orderIndex(0)
                 .type(CateType.article.name())
                 .build();
-        sqlManager.insertTemplate(cate, true);
-        ChiKaUser user = ChiKaUser.builder()
-                .role(ChiKaConstant.ROLE_SYSTEM)
+        long cateId = cateService.insertCate(cate);
+        CKUser user = CKUser.builder()
+                .role(CKConstant.ROLE_SYSTEM)
                 .nickname("千夏博客系统")
-                .enable(ChikaValue.ENABLE.intVal())
+                .enable(CKValue.ENABLE.intVal())
                 .build();
-        sqlManager.insertTemplate(user, true);
+        String sql = "insert into chika_user(role,nickname,enable) values(:role,:nickname,:enable)";
+        long userId = dao.insertBeanAutoGenKeyReturnKey(sql, user);
         final String title = "欢迎使用「千夏博客」（ChiKa Blog）";
-        final String content = "<h2 id=\"h2--chika-em-v4-em-\"><a name=\"欢迎使用「千夏博客」（ChiKa Blog）\" class=\"reference-link\"></a><span class=\"header-link octicon octicon-link\"></span>欢迎使用「千夏博客」（ChiKa Blog）</h2><p>「千夏博客」是基于springboot+layui+Beetl编写的一款轻博客系统，可完美搭建您的一款简约博客网站，同时也是非常适用于学习的项目。欢迎大家<a href=\"https://github.com/miyakowork/noteblogv4\" title=\"star\">★star</a>。</p>\n" +
-                "<p>如果您有任何意见或者建议，请移步QQ群。<br>有任何问题欢迎加QQ群：<a href=\"https://jq.qq.com/?_wv=1027&amp;k=5FgsNj3\" title=\"697053454\">697053454</a>，加入你可以第一时间获取最新信息以及和伙伴们一起交流。</p>\n";
-        final String textContent = "欢迎使用「千夏博客」（ChiKa Blog）笔记博客是基于springboot+layui+Beetl编写的一款轻博客系统，可完美搭建您的一款简约博客网站，同时也是非常适用于学习的项目。欢迎大家★star。如果您觉得此项目帮助到了您，请您给作者点个赞。如果您有任何意见或者建议，请移步QQ群。有任何问题欢迎加QQ群：697053454，加入你可以第一时间获取最新信息以及和伙伴们一起交流。";
-        final String mdContent = "##欢迎使用「千夏博客」（ChiKa Blog）\n\n" +
-                "笔记博客是基于springboot+layui+Beetl编写的一款轻博客系统，可完美搭建您的一款简约博客网站，同时也是非常适用于学习的项目。欢迎大家[★star](https://github.com/miyakowork/noteblogv4 \"star\")。\n\n" +
-                "\n如果您有任何意见或者建议，请移步QQ群。\n" +
-                "有任何问题欢迎加QQ群：[697053454](https://jq.qq.com/?_wv=1027&k=5FgsNj3 \"697053454\")，加入你可以第一时间获取最新信息以及和伙伴们一起交流。\n";
-        final String summary = "欢迎使用「千夏博客」（ChiKa Blog）,「千夏博客」是基于springboot+layui+Beetl编写的一款轻博客系统，可完美搭建您的一款简约博客网站，同时也是非常适用于学习的项目。欢迎大家★star。如果您觉得此项目帮助到了您，请";
-        ChiKaArticle article = ChiKaArticle.builder()
+        final String content = "";
+        final String textContent = "";
+        final String mdContent = "";
+        final String summary = "";
+        CKArticle article = CKArticle.builder()
                 .id(ObjectId.next())
-                .authorId(user.getId())
+                .authorId(userId)
                 .cover("/static/assets/img/cover.png")
                 .content(content)
                 .textContent(textContent)
@@ -240,18 +242,22 @@ public class InitializationListener implements ApplicationListener<ContextRefres
                 .appreciable(true)
                 .title(title)
                 .build();
-        sqlManager.insertTemplate(article);
-        sqlManager.executeUpdate(new SQLReady("insert into chika_cate_refer(cate_id,refer_id) values(?,?)", cate.getId(), article.getId()));
+        int insertArticleCnt = articleService.insertArticle(article);
+        if (insertArticleCnt == 0) {
+            log.error("初始化Hello World 文章失败！");
+        }
+        String cateRefer = "insert into chika_cate_refer(cate_id,refer_id) values(?,?)";
+        dao.executeArray(cateRefer, cateId, article.getId());
         log.info("「千夏博客」初始化基本内容完毕。");
     }
 
     /**
      * 插入系统的启动时间
      */
-    private void setUpSystemStartedTime() {
+    private void setUpSystemStartedTime() throws Exception {
         LocalDateTime now = LocalDateTime.now();
-        paramDao.updateValueByName(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-                ChiKaKey.SYSTEM_STARTED_DATETIME.key());
+        paramService.updateValueByName(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                CKKey.SYSTEM_STARTED_DATETIME.key());
     }
 
     /**
@@ -259,7 +265,7 @@ public class InitializationListener implements ApplicationListener<ContextRefres
      *
      * @param event
      */
-    private void setUpAdminMenu(ContextRefreshedEvent event) {
+    private void setUpAdminMenu(ContextRefreshedEvent event) throws Exception {
         ApplicationContext ac = event.getApplicationContext();
         Map<String, Object> beans = ac.getBeansWithAnnotation(Controller.class);
         beans.putAll(ac.getBeansWithAnnotation(RestController.class));
@@ -290,7 +296,7 @@ public class InitializationListener implements ApplicationListener<ContextRefres
                                     menus.add(m);
                                 }
                                 String menusJson = JSONUtil.toJsonStr(menus);
-                                paramDao.updateValueByName(menusJson, ChiKaKey.ADMIN_MENU.key());
+                                paramService.updateValueByName(menusJson, CKKey.ADMIN_MENU.key());
                             }
                         }
 

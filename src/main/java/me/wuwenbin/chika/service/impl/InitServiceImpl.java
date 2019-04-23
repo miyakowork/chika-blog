@@ -2,16 +2,14 @@ package me.wuwenbin.chika.service.impl;
 
 import cn.hutool.crypto.SecureUtil;
 import lombok.extern.slf4j.Slf4j;
-import me.wuwenbin.chika.dao.ChiKaParamDao;
-import me.wuwenbin.chika.dao.ChiKaUserDao;
 import me.wuwenbin.chika.exception.SystemInitException;
 import me.wuwenbin.chika.model.bean.Result;
-import me.wuwenbin.chika.model.constant.ChiKaConstant;
-import me.wuwenbin.chika.model.constant.ChiKaKey;
-import me.wuwenbin.chika.model.constant.ChikaValue;
-import me.wuwenbin.chika.model.entity.ChiKaUser;
+import me.wuwenbin.chika.model.constant.CKConstant;
+import me.wuwenbin.chika.model.constant.CKKey;
+import me.wuwenbin.chika.model.constant.CKValue;
 import me.wuwenbin.chika.service.InitService;
-import me.wuwenbin.chika.util.ChiKaKit;
+import me.wuwenbin.chika.service.ParamService;
+import me.wuwenbin.chika.util.CKUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -34,22 +32,20 @@ public class InitServiceImpl implements InitService {
     private static final String emailKey = "_email";
     private static final String uploadTypeKey = "upload_type";
 
-    private final ChiKaParamDao paramDao;
-    private final ChiKaUserDao userDao;
+    private final ParamService paramService;
     private final Environment env;
 
     @Autowired
-    public InitServiceImpl(ChiKaParamDao paramDao, ChiKaUserDao userDao, Environment env) {
-        this.paramDao = paramDao;
-        this.userDao = userDao;
+    public InitServiceImpl(ParamService paramService, Environment env) {
+        this.paramService = paramService;
         this.env = env;
     }
 
     @Override
     public Result initSystem(Map<String, String[]> param) {
-        Map<String, Object> paramMap = ChiKaKit.getParameterMap(param);
-        if (paramMap.get(uploadTypeKey).equals(ChikaValue.LOCAL_SERVER.strVal())) {
-            if (StringUtils.isEmpty(env.getProperty(ChiKaConstant.UPLOAD_PATH_KEY))) {
+        Map<String, Object> paramMap = CKUtils.getParameterMap(param);
+        if (paramMap.get(uploadTypeKey).equals(CKValue.LOCAL_SERVER.strVal())) {
+            if (StringUtils.isEmpty(env.getProperty(CKConstant.UPLOAD_PATH_KEY))) {
                 return Result.error("配置文件「application-chika.properties」中「chika.upload.path」未正确配置！");
             }
         }
@@ -60,10 +56,10 @@ public class InitServiceImpl implements InitService {
                 String key = next.getKey();
                 if (!StringUtils.isEmpty(next.getValue())) {
                     Object value = next.getValue();
-                    paramDao.updateValueByName(value, key);
+                    paramService.updateValueByName(value, key);
                 }
             }
-            paramDao.updateValueByName(ChikaValue.ENABLE.intVal(), ChiKaKey.SYSTEM_INIT_STATE.key());
+            paramService.updateValueByName(CKValue.ENABLE.intVal(), CKKey.SYSTEM_INIT_STATE.key());
             return Result.ok("初始化设置成功！");
         } catch (Exception e) {
             log.error("系统初始化设置异常", e);
@@ -72,31 +68,31 @@ public class InitServiceImpl implements InitService {
     }
 
 
-    private Map<String, Object> initUser(Map<String, Object> paramMap) {
+    private Map<String, Object> initUser(Map<String, Object> paramMap) throws Exception {
         String password = paramMap.get(passwordKey).toString();
         String username = paramMap.get(usernameKey).toString();
         String email = paramMap.get(emailKey).toString();
-        ChiKaUser initUser = ChiKaUser.builder()
-                .avatar("/static/assets/img/avatar.png")
-                .role(ChiKaConstant.ROLE_ADMIN)
-                .nickname("千夏博客用户")
-                .password(SecureUtil.md5(password))
-                .username(username)
-                .email(email)
-                .create(new Date())
-                .enable(ChikaValue.ENABLE.intVal())
-                .build();
-        userDao.insertTemplate(initUser);
-        paramDao.updateValueByName(ChikaValue.ENABLE.intVal(), ChiKaKey.ADMIN_SET_STATE.key());
+        String initUserSql = "insert into chika_user(avatar,role,nickname,password,username,email,`create`,enable) values(?,?,?,?,?,?,?,?)";
+        baseDao().executeArray(initUserSql,
+                "/static/assets/img/avatar.png",
+                CKConstant.ROLE_ADMIN,
+                "千夏博客用户",
+                SecureUtil.md5(password),
+                username,
+                email,
+                new Date(),
+                CKValue.ENABLE.intVal()
+        );
+        paramService.updateValueByName(CKValue.ENABLE.intVal(), CKKey.ADMIN_SET_STATE.key());
         paramMap.remove(passwordKey);
         paramMap.remove(emailKey);
         return paramMap;
     }
 
-    private Map<String, Object> initUpload(Map<String, Object> paramMap) {
+    private Map<String, Object> initUpload(Map<String, Object> paramMap) throws Exception {
         String uploadType = paramMap.get(uploadTypeKey).toString();
-        paramDao.updateValueByName(uploadType, ChiKaKey.UPLOAD_TYPE.key());
-        paramDao.updateValueByName(ChikaValue.ENABLE.intVal(), ChiKaKey.OSS_UPLOAD_ONOFF.key());
+        paramService.updateValueByName(uploadType, CKKey.UPLOAD_TYPE.key());
+        paramService.updateValueByName(CKValue.ENABLE.intVal(), CKKey.OSS_UPLOAD_ONOFF.key());
         paramMap.remove(uploadTypeKey);
         return paramMap;
     }

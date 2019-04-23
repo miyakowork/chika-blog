@@ -2,7 +2,7 @@ package me.wuwenbin.chika.interceptor;
 
 import lombok.extern.slf4j.Slf4j;
 import me.wuwenbin.chika.controller.BaseController;
-import me.wuwenbin.chika.model.entity.ChiKaUser;
+import me.wuwenbin.chika.model.entity.CKUser;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,7 +18,7 @@ public class TokenInterceptor extends BaseController implements HandlerIntercept
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        ChiKaUser sessionUser = getSessionUser(request);
+        CKUser sessionUser = getSessionUser(request);
         if (sessionUser == null) {
             if (isAjaxRequest(request)) {
                 handleAjaxRequest(request, response);

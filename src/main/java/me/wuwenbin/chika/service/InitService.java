@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * created by Wuwenbin on 2019/3/16 at 12:34
  */
-public interface InitService {
+public interface InitService extends PublicService{
 
     /**
      * 初始化系统设置

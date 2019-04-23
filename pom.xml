@@ -34,11 +34,6 @@
             <version>${kaptcha.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.ibeetl</groupId>
-            <artifactId>beetl-framework-starter</artifactId>
-            <version>${beetl.version}</version>
-        </dependency>
-        <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
             <version>${hutool.version}</version>
@@ -48,12 +43,10 @@
             <artifactId>druid-spring-boot-starter</artifactId>
             <version>${druid.starter}</version>
         </dependency>
-
-        <!--防止beetl在jdk8编译警告-->
         <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4-runtime</artifactId>
-            <version>4.7.2</version>
+            <groupId>me.wuwenbin</groupId>
+            <artifactId>simple-spring-jdbc</artifactId>
+            <version>1.0</version>
         </dependency>
 
         <dependency>

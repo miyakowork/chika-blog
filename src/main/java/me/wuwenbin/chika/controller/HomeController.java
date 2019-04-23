@@ -16,6 +16,6 @@ public class HomeController {
 
     @GetMapping("/management/index")
     public String mIndex() {
-        return "management/index";
+        return "management/admin_index";
     }
 }

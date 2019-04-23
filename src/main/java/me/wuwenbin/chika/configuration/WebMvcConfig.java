@@ -1,11 +1,11 @@
 package me.wuwenbin.chika.configuration;
 
-import me.wuwenbin.chika.dao.ChiKaParamDao;
 import me.wuwenbin.chika.interceptor.AdminInterceptor;
 import me.wuwenbin.chika.interceptor.SessionInterceptor;
 import me.wuwenbin.chika.interceptor.ThemeInterceptor;
 import me.wuwenbin.chika.interceptor.TokenInterceptor;
-import me.wuwenbin.chika.model.constant.ChikaValue;
+import me.wuwenbin.chika.model.constant.CKValue;
+import me.wuwenbin.chika.service.ParamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -22,12 +22,12 @@ import java.util.List;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    private final ChiKaParamDao paramDao;
+    private final ParamService paramService;
     private final Environment env;
 
     @Autowired
-    public WebMvcConfig(ChiKaParamDao paramDao, Environment env) {
-        this.paramDao = paramDao;
+    public WebMvcConfig(ParamService paramService, Environment env) {
+        this.paramService = paramService;
         this.env = env;
     }
 
@@ -42,7 +42,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/static/**").addResourceLocations(env.getProperty("spring.resources.static-locations"));
         String uploadPath = env.getProperty("chika.upload.path");
-        registry.addResourceHandler(ChikaValue.FILE_URL_PREFIX.strVal() + "/**").addResourceLocations(uploadPath);
+        registry.addResourceHandler(CKValue.FILE_URL_PREFIX.strVal() + "/**").addResourceLocations(uploadPath);
     }
 
     /**
@@ -56,11 +56,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
         List<String> excludePaths = Arrays.asList("/static/**", "/error/**", "/init/**");
         List<String> excludePaths2 = Arrays.asList("/api/qq", "/api/qqCallback", "/api/github", "/api/githubCallback");
         String excludePath3 = "/management/**";
-        registry.addInterceptor(new SessionInterceptor(paramDao)).addPathPatterns("/**")
+        registry.addInterceptor(new SessionInterceptor(paramService)).addPathPatterns("/**")
                 .excludePathPatterns(excludePaths);
         registry.addInterceptor(new TokenInterceptor()).addPathPatterns("/token/**");
         registry.addInterceptor(new AdminInterceptor()).addPathPatterns("/management/**");
-        registry.addInterceptor(new ThemeInterceptor(paramDao)).addPathPatterns("/**")
+        registry.addInterceptor(new ThemeInterceptor(paramService)).addPathPatterns("/**")
                 .excludePathPatterns(excludePaths).excludePathPatterns(excludePaths2)
                 .excludePathPatterns(excludePath3);
     }

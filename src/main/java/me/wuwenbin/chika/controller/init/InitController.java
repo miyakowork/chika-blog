@@ -1,9 +1,9 @@
 package me.wuwenbin.chika.controller.init;
 
 import me.wuwenbin.chika.model.bean.Result;
-import me.wuwenbin.chika.model.constant.ChiKaConstant;
+import me.wuwenbin.chika.model.constant.CKConstant;
 import me.wuwenbin.chika.service.InitService;
-import me.wuwenbin.chika.util.ChiKaKit;
+import me.wuwenbin.chika.util.CKUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +30,7 @@ public class InitController {
     @GetMapping("/init")
     public String init() {
         request.setAttribute("uploadPathInEnv",
-                ChiKaKit.getEnvPropertyByKey(ChiKaConstant.UPLOAD_PATH_KEY, String.class));
+                CKUtils.getEnvPropertyByKey(CKConstant.UPLOAD_PATH_KEY, String.class));
         return "init";
     }
 

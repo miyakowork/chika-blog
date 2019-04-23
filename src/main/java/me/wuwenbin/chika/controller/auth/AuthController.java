@@ -4,16 +4,14 @@ import cn.hutool.cache.Cache;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import me.wuwenbin.chika.controller.BaseController;
-import me.wuwenbin.chika.dao.ChiKaParamDao;
-import me.wuwenbin.chika.dao.ChiKaUserDao;
 import me.wuwenbin.chika.model.bean.Result;
 import me.wuwenbin.chika.model.bean.login.GithubLoginData;
 import me.wuwenbin.chika.model.bean.login.QqLoginData;
 import me.wuwenbin.chika.model.bean.login.SimpleLoginData;
-import me.wuwenbin.chika.model.constant.ChiKaConstant;
-import me.wuwenbin.chika.model.constant.ChiKaKey;
-import me.wuwenbin.chika.model.entity.ChiKaParam;
-import me.wuwenbin.chika.model.entity.ChiKaUser;
+import me.wuwenbin.chika.model.constant.CKConstant;
+import me.wuwenbin.chika.model.constant.CKKey;
+import me.wuwenbin.chika.model.entity.CKParam;
+import me.wuwenbin.chika.model.entity.CKUser;
 import me.wuwenbin.chika.service.AuthService;
 import me.wuwenbin.chika.service.LoginService;
 import me.wuwenbin.chika.service.ParamService;
@@ -34,8 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 public class AuthController extends BaseController {
 
     private final HttpServletRequest request;
-    private final ChiKaParamDao paramDao;
-    private final ChiKaUserDao userDao;
     private final ParamService paramService;
     private final AuthService authService;
     private final LoginService<Result, SimpleLoginData> simpleLoginService;
@@ -47,20 +43,16 @@ public class AuthController extends BaseController {
     public AuthController(HttpServletRequest request,
                           @Qualifier("simpleLoginService") LoginService<Result, SimpleLoginData> simpleLoginService,
                           @Qualifier("qqLoginService") LoginService<Result, QqLoginData> qqLoginService,
-                          ChiKaParamDao paramDao,
                           ParamService paramService,
                           AuthService authService,
                           Cache<String, String> codeCache,
-                          ChiKaUserDao userDao,
                           @Qualifier("githubLoginService") LoginService<Result, GithubLoginData> githubLoginService) {
         this.request = request;
         this.simpleLoginService = simpleLoginService;
         this.qqLoginService = qqLoginService;
-        this.paramDao = paramDao;
         this.paramService = paramService;
         this.authService = authService;
         this.codeCache = codeCache;
-        this.userDao = userDao;
         this.githubLoginService = githubLoginService;
     }
 
@@ -86,7 +78,11 @@ public class AuthController extends BaseController {
     @PostMapping("/reset")
     @ResponseBody
     public Result forgot(String email) {
-        return authService.resetPassword(email);
+        try {
+            return authService.resetPass(email);
+        } catch (Exception e) {
+            return Result.error("重置密码出错，错误信息：" + e.getMessage());
+        }
     }
 
     @PostMapping("/registration")
@@ -98,11 +94,15 @@ public class AuthController extends BaseController {
         } else if (chiKaUser.length() < min || chiKaUser.length() > max || chiKaPass.length() < minPass) {
             return Result.error("所填信息不规范！");
         } else {
-            String sessionMailCode = codeCache.get(chiKaUser + "-" + ChiKaConstant.MAIL_CODE_KEY);
+            String sessionMailCode = codeCache.get(chiKaUser + "-" + CKConstant.MAIL_CODE_KEY);
             if (mailCode.equalsIgnoreCase(sessionMailCode)) {
-                if (userDao.countEmailAndUsername(chiKaUser) == 0) {
-                    authService.userRegister(chiKaUser, chiKaPass, nickname);
-                    return Result.ok("注册成功！", ChiKaConstant.LOGIN_URL);
+                if (authService.countEmailAndUsername(chiKaUser) == 0) {
+                    try {
+                        authService.userRegister(chiKaUser, chiKaPass, nickname);
+                        return Result.ok("注册成功！", CKConstant.LOGIN_URL);
+                    } catch (Exception e) {
+                        return Result.error("注册失败，错误信息：" + e.getMessage());
+                    }
                 } else {
                     return Result.error("已存在此邮箱，请勿重复注册！");
                 }
@@ -115,16 +115,16 @@ public class AuthController extends BaseController {
 
     @GetMapping("/login")
     public String login() {
-        ChiKaUser sessionUser = getSessionUser(request);
+        CKUser sessionUser = getSessionUser(request);
         if (sessionUser != null) {
-            if (sessionUser.getRole() == ChiKaConstant.ROLE_ADMIN) {
-                return "redirect:" + ChiKaConstant.MANAGEMENT_INDEX;
+            if (sessionUser.getRole() == CKConstant.ROLE_ADMIN) {
+                return "redirect:" + CKConstant.MANAGEMENT_INDEX;
             } else {
-                return "redirect:" + ChiKaConstant.FRONTEND_INDEX;
+                return "redirect:" + CKConstant.FRONTEND_INDEX;
             }
         } else {
-            ChiKaParam appId = paramDao.findByName(ChiKaKey.QQ_APP_ID.key());
-            ChiKaParam githubClientId = paramDao.findByName(ChiKaKey.GITHUB_CLIENT_ID.key());
+            CKParam appId = paramService.findByName(CKKey.QQ_APP_ID.key());
+            CKParam githubClientId = paramService.findByName(CKKey.GITHUB_CLIENT_ID.key());
             request.setAttribute("isOpenRegister", paramService.isSetSendMailServer());
             request.setAttribute("isOpenForgot", paramService.isSetSendMailServer());
             request.setAttribute("isOpenQqLogin",
@@ -138,7 +138,7 @@ public class AuthController extends BaseController {
     @RequestMapping("/api/qq")
     public String qqLogin() {
         String callbackDomain = basePath(request).concat("api/qqCallback");
-        ChiKaParam appId = paramDao.findByName(ChiKaKey.QQ_APP_ID.key());
+        CKParam appId = paramService.findByName(CKKey.QQ_APP_ID.key());
         if (appId == null || StringUtils.isEmpty(appId.getValue())) {
             request.getSession().setAttribute("errorMessage", "未设置QQ登录相关参数！");
             return "redirect:/error?errorCode=403";
@@ -151,13 +151,13 @@ public class AuthController extends BaseController {
     @RequestMapping("/api/github")
     public String githubLogin() {
         String callbackDomain = basePath(request).concat("api/githubCallback");
-        ChiKaParam githubClientId = paramDao.findByName(ChiKaKey.GITHUB_CLIENT_ID.key());
+        CKParam githubClientId = paramService.findByName(CKKey.GITHUB_CLIENT_ID.key());
         if (githubClientId == null || StringUtils.isEmpty(githubClientId.getValue())) {
             request.getSession().setAttribute("errorMessage", "未设置GITHUB登录相关参数！");
             return "redirect:/error?errorCode=403";
         } else {
             return "redirect:https://github.com/login/oauth/authorize?response_type=code&client_id="
-                    + githubClientId.getValue() + "&redirect_uri=" + callbackDomain + "&state=" + ChiKaConstant.GITHUB_AUTH_STATE;
+                    + githubClientId.getValue() + "&redirect_uri=" + callbackDomain + "&state=" + CKConstant.GITHUB_AUTH_STATE;
         }
     }
 
@@ -177,7 +177,7 @@ public class AuthController extends BaseController {
             return "redirect:/error?errorCode=404";
         }
         if (r.get(Result.CODE).equals(Result.SUCCESS)) {
-            setSessionUser(request, (ChiKaUser) r.get(ChiKaConstant.SESSION_USER_KEY));
+            setSessionUser(request, (CKUser) r.get(CKConstant.SESSION_USER_KEY));
             return "redirect:" + r.get(Result.DATA);
         } else {
             return "redirect:/error?errorCode=404";

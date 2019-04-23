@@ -4,9 +4,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.mail.MailAccount;
 import cn.hutool.extra.mail.MailUtil;
-import me.wuwenbin.chika.dao.ChiKaParamDao;
-import me.wuwenbin.chika.model.constant.ChiKaKey;
+import me.wuwenbin.chika.model.constant.CKKey;
 import me.wuwenbin.chika.service.MailService;
+import me.wuwenbin.chika.service.ParamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,21 +20,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(rollbackFor = Exception.class, readOnly = true)
 public class MailServiceImpl implements MailService {
 
-    private final ChiKaParamDao paramDao;
+    private final ParamService paramService;
 
     @Autowired
-    public MailServiceImpl(ChiKaParamDao paramDao) {
-        this.paramDao = paramDao;
+    public MailServiceImpl(ParamService paramService) {
+        this.paramService = paramService;
     }
-
 
     @Override
     public void sendMail(String subject, String targetMail, String content, boolean isHtml) {
-        String host = paramDao.findByName(ChiKaKey.MAIL_SMPT_SERVER_ADDR.key()).getValue();
-        String port = paramDao.findByName(ChiKaKey.MAIL_SMPT_SERVER_PORT.key()).getValue();
-        String from = paramDao.findByName(ChiKaKey.MAIL_SERVER_ACCOUNT.key()).getValue();
-        String user = paramDao.findByName(ChiKaKey.MAIL_SENDER_NAME.key()).getValue();
-        String pass = paramDao.findByName(ChiKaKey.MAIL_SERVER_PASSWORD.key()).getValue();
+        String host = paramService.findByName(CKKey.MAIL_SMPT_SERVER_ADDR.key()).getValue();
+        String port = paramService.findByName(CKKey.MAIL_SMPT_SERVER_PORT.key()).getValue();
+        String from = paramService.findByName(CKKey.MAIL_SERVER_ACCOUNT.key()).getValue();
+        String user = paramService.findByName(CKKey.MAIL_SENDER_NAME.key()).getValue();
+        String pass = paramService.findByName(CKKey.MAIL_SERVER_PASSWORD.key()).getValue();
         if (StrUtil.isNotEmpty(host)
                 && StrUtil.isNotEmpty(port)
                 && StrUtil.isNotEmpty(from)

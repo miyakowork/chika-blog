@@ -5,14 +5,14 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
-import me.wuwenbin.chika.dao.ChiKaParamDao;
-import me.wuwenbin.chika.dao.ChiKaUserDao;
 import me.wuwenbin.chika.model.bean.Result;
 import me.wuwenbin.chika.model.bean.login.QqLoginData;
-import me.wuwenbin.chika.model.constant.ChiKaConstant;
-import me.wuwenbin.chika.model.constant.ChiKaKey;
-import me.wuwenbin.chika.model.entity.ChiKaUser;
+import me.wuwenbin.chika.model.constant.CKConstant;
+import me.wuwenbin.chika.model.constant.CKKey;
+import me.wuwenbin.chika.model.entity.CKUser;
+import me.wuwenbin.chika.service.AuthService;
 import me.wuwenbin.chika.service.LoginService;
+import me.wuwenbin.chika.service.ParamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,20 +26,20 @@ import java.util.Map;
 @Service("qqLoginService")
 public class QqLoginServiceImpl implements LoginService<Result, QqLoginData> {
 
-    private final ChiKaUserDao userDao;
-    private final ChiKaParamDao paramDao;
+    private final AuthService authService;
+    private final ParamService paramService;
 
     @Autowired
-    public QqLoginServiceImpl(ChiKaUserDao userDao, ChiKaParamDao paramDao) {
-        this.userDao = userDao;
-        this.paramDao = paramDao;
+    public QqLoginServiceImpl(AuthService authService, ParamService paramService) {
+        this.authService = authService;
+        this.paramService = paramService;
     }
 
     @Override
     public Result doLogin(QqLoginData data) {
         try {
-            String appId = paramDao.findByName(ChiKaKey.QQ_APP_ID.key()).getValue();
-            String appKey = paramDao.findByName(ChiKaKey.QQ_APP_KEY.key()).getValue();
+            String appId = paramService.findByName(CKKey.QQ_APP_ID.key()).getValue();
+            String appKey = paramService.findByName(CKKey.QQ_APP_KEY.key()).getValue();
 
             Map<String, Object> p1 = MapUtil.of("grant_type", "authorization_code");
             p1.put("client_id", appId);
@@ -58,29 +58,27 @@ public class QqLoginServiceImpl implements LoginService<Result, QqLoginData> {
 
             JSONObject json2 = JSONUtil.parseObj(HttpUtil.get("https://graph.qq.com/user/get_user_info", p2));
             if (json2.getInt("ret") == 0) {
-                ChiKaUser user = userDao.findByQqOpenId(openId, true);
+                CKUser user = authService.findByQqOpenId(openId, true);
                 if (user != null) {
-                    return Result.ok("授权成功！", "/").put(ChiKaConstant.SESSION_USER_KEY, user);
+                    return Result.ok("授权成功！", "/").put(CKConstant.SESSION_USER_KEY, user);
                 } else {
-                    ChiKaUser lockedUser = userDao.findByQqOpenId(openId, false);
+                    CKUser lockedUser = authService.findByQqOpenId(openId, false);
                     if (lockedUser != null) {
                         return Result.error("QQ登录授权失败，原因：用户已被锁定！");
                     }
                     String nickname = json2.getStr("nickname");
-                    int cnt = userDao.countNickname(nickname);
+                    int cnt = authService.countNickname(nickname);
                     nickname = cnt > 0 ? nickname + new java.util.Date().getTime() : nickname;
                     String avatar = json2.getStr("figureurl_qq_2").replace("http://", "https://");
-                    ChiKaUser registerUser = ChiKaUser.builder()
-                            .role(ChiKaConstant.ROLE_USER).create(new Date())
+                    CKUser registerUser = CKUser.builder()
+                            .role(CKConstant.ROLE_USER).create(new Date())
                             .nickname(nickname).avatar(avatar).qqOpenId(openId)
-                            .accountType(ChiKaConstant.TYPE_QQ).enable(1)
+                            .accountType(CKConstant.TYPE_QQ).enable(1)
                             .build();
-                    userDao.insertTemplate(registerUser, true);
-                    if (registerUser.getId() != null) {
-                        return Result.ok("授权成功！", "/").put(ChiKaConstant.SESSION_USER_KEY, registerUser);
-                    } else {
-                        return Result.error("QQ登录授权失败，原因：注册失败！");
-                    }
+                    String registerUserSql = "insert into chika_user(role,`create`,nickname,avatar,qq_open_id,account_type,enable) " +
+                            "values(:role,:create,:nickname,:avatar,:qqOpenId,:accountType,:enable)";
+                    CKUser registeredUser = baseDao().insertBeanAutoGenKeyReturnBean(registerUserSql, registerUser, CKUser.class, "id");
+                    return Result.ok("授权成功！", "/").put(CKConstant.SESSION_USER_KEY, registerUser);
                 }
             } else {
                 String errorMsg = json2.getStr("msg");
