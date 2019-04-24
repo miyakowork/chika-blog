@@ -11,14 +11,36 @@
     <link rel="stylesheet" href="/static/plugins/layuiadmin/style/admin.css" media="all">
 </head>
 <body>
-
-
+<style>
+    input[disabled] {
+        color: #cccccc;
+        background-color: rgba(194, 194, 194, 0.3);
+    }
+</style>
 <div class="layui-fluid layui-anim layui-anim-upbit" id="LAY-article-add">
     <div class="layui-row layui-col-space20">
         <div class="layui-col-md9">
-            <div class="layui-card">
-                <div class="layui-card-body">
-                    <input type="text" name="title" required lay-verify="required" placeholder="请输入标题" autocomplete="off" class="layui-input">
+            <div class="layui-card layui-form">
+                <div class="layui-card-body" style="padding-top: 25px;">
+                    <div class="layui-form-item">
+                        <input type="text" name="title" required lay-verify="required" placeholder="请输入文章标题"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-form-item layui-row layui-col-space20">
+                        <div class="layui-col-md10">
+                            <input type="text" name="urlSeq" required lay-verify="required"
+                                   placeholder="自定义文章链接，例如：/my-first-blog"
+                                   lay-filter="urlSeq" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-col-md2">
+                            <input type="checkbox" name="" title="自定义文章链接" lay-skin="primary" lay-filter="customUrl"
+                                   checked>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="layui-form-item">
+
+                    </div>
                 </div>
             </div>
         </div>
@@ -36,7 +58,7 @@
         base: '/static/plugins/layuiadmin/' //静态资源所在路径
     }).extend({
         index: 'lib/index' //主入口模块
-    }).use(['index']);
+    }).use(['index', 'article']);
 </script>
 </body>
 </html>
