@@ -139,10 +139,6 @@ public enum CKKey {
     THEME_HOMEPAGE_ONOFF(StrUtil.EMPTY, HIGHEST.intVal(), "使用的主题的默认首页url"),
     UPLOAD_TYPE(LOCAL_SERVER.val(), HIGHEST.intVal(), "文件上传方式"),
 
-    /**
-     * 系统后台菜单
-     */
-    ADMIN_MENU(StrUtil.EMPTY, HIGHER.intVal(), "后台管理菜单"),
 
     /**
      * 系统启动的时间

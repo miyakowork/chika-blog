@@ -4,13 +4,9 @@ import cn.hutool.core.lang.ObjectId;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
-import me.wuwenbin.chika.annotation.AdminMenu;
-import me.wuwenbin.chika.annotation.GroupName;
 import me.wuwenbin.chika.configuration.TableConfig;
 import me.wuwenbin.chika.exception.PropertyErrorException;
-import me.wuwenbin.chika.model.bean.Menu;
 import me.wuwenbin.chika.model.constant.CKConstant;
 import me.wuwenbin.chika.model.constant.CKKey;
 import me.wuwenbin.chika.model.constant.CKValue;
@@ -27,7 +23,6 @@ import me.wuwenbin.data.jdbc.ancestor.AncestorDao;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.system.ApplicationHome;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
@@ -43,10 +38,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 数据库表初始化
@@ -102,7 +94,6 @@ public class InitializationListener implements ApplicationListener<ContextRefres
                 } else {
                     log.info("「千夏博客」已完成初始化，略过初始化步骤，请稍后...");
                 }
-                setUpAdminMenu(contextRefreshedEvent);
                 setUpSystemStartedTime();
                 log.info("「千夏博客」启动成功！");
                 file.createNewFile();
@@ -260,53 +251,6 @@ public class InitializationListener implements ApplicationListener<ContextRefres
                 CKKey.SYSTEM_STARTED_DATETIME.key());
     }
 
-    /**
-     * 获取菜单存到数据库中
-     *
-     * @param event
-     */
-    private void setUpAdminMenu(ContextRefreshedEvent event) throws Exception {
-        ApplicationContext ac = event.getApplicationContext();
-        Map<String, Object> beans = ac.getBeansWithAnnotation(Controller.class);
-        beans.putAll(ac.getBeansWithAnnotation(RestController.class));
-        List<Menu> menus = new ArrayList<>();
-        for (Object bean : beans.values()) {
-            if (InitStrUtil.isControllerPresent(bean)) {
-                String[] prefixes = InitStrUtil.getPrefixUrl(bean);
-                for (String prefix : prefixes) {
-                    Method[] methods = AopProxyUtils.ultimateTargetClass(bean).getDeclaredMethods();
-                    for (Method method : methods) {
-                        String[] lasts = InitStrUtil.getLastUrl(method);
-                        for (String last : lasts) {
-                            String url = InitStrUtil.getCompleteUrl(prefix, last);
-                            if (method.isAnnotationPresent(AdminMenu.class)) {
-                                AdminMenu menu = method.getAnnotation(AdminMenu.class);
-                                String menuName = menu.value();
-                                int order = menu.order();
-                                Class<?>[] groups = menu.groups();
-                                for (Class group : groups) {
-                                    String groupName = ((GroupName) group.getAnnotation(GroupName.class)).value();
-                                    Menu m = Menu.builder()
-                                            .groupName(groupName)
-                                            .icon("fa fa-list-ul")
-                                            .name(menuName)
-                                            .order(order)
-                                            .url(url)
-                                            .build();
-                                    menus.add(m);
-                                }
-                                String menusJson = JSONUtil.toJsonStr(menus);
-                                paramService.updateValueByName(menusJson, CKKey.ADMIN_MENU.key());
-                            }
-                        }
-
-                    }
-
-                }
-
-            }
-        }
-    }
 
     private static class InitStrUtil {
 
