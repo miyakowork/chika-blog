@@ -76,20 +76,31 @@
 
                 <ul class="layui-nav layui-nav-tree" lay-shrink="all" id="LAY-system-side-menu"
                     lay-filter="layadmin-system-side-menu">
-                    <li data-name="get" class="layui-nav-item layui-this">
+                    <li data-name="console" class="layui-nav-item layui-this">
                         <a href="javascript:;" lay-href="/management/console" lay-tips="控制台" lay-direction="2">
                             <i class="layui-icon layui-icon-console"></i>
                             <cite>控制台</cite>
                         </a>
                     </li>
-                    <li data-name="home" class="layui-nav-item">
-                        <a href="javascript:;" lay-tips="主页" lay-direction="2">
+                    <li data-name="content" class="layui-nav-item">
+                        <a href="javascript:;" lay-tips="内容发布" lay-direction="2">
                             <i class="layui-icon layui-icon-survey"></i>
                             <cite>内容发布</cite>
                         </a>
                         <dl class="layui-nav-child">
-                            <dd data-name="console">
+                            <dd data-name="article-post">
                                 <a lay-href="/management/article/add">文章发布</a>
+                            </dd>
+                        </dl>
+                    </li>
+                    <li data-name="dictionary" class="layui-nav-item">
+                        <a href="javascript:;" lay-tips="字典管理" lay-direction="2">
+                            <i class="layui-icon layui-icon-survey"></i>
+                            <cite>字典管理</cite>
+                        </a>
+                        <dl class="layui-nav-child">
+                            <dd data-name="console">
+                                <a lay-href="/management/article/add">分类管理</a>
                             </dd>
                         </dl>
                     </li>

@@ -32,7 +32,7 @@ layui.define(['form'], function (exports) {
                 }
             });
         } else {
-            $urlSeqInput.val("/article/#{文章ID}#");
+            $urlSeqInput.val("文章链接为系统自动生成的ID，如：/article/#{文章ID}#");
             $urlSeqInput.attr("disabled", true);
             $titleInput.unbind("input propertychange");
         }
