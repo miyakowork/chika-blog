@@ -17,4 +17,9 @@ public class CateServiceImpl implements CateService {
         String sql = "insert into chika_cate(cn_name,name,font_icon,order_index,type) values(:cnName,:name,:fontIcon,:orderIndex,:type)";
         return baseDao().insertBeanAutoGenKeyReturnKey(sql, cate);
     }
+
+    @Override
+    public boolean cateExist(CKCate ckCate) {
+        return false;
+    }
 }

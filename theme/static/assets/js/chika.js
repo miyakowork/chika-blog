@@ -32,45 +32,6 @@ var ChiKa = {
         })
     }
 
-    , ajaxManagement: function (url, data, success) {
-        layui.$.ajax({
-            type: 'post'
-            , dataType: 'json'
-            , url: BMY.url.prefix + url
-            , data: data
-            , success: success
-            , error: function (err) {
-                var msg = err.responseJSON.message || "发生未知错误！";
-                layer.msg(msg);
-            }
-        })
-    }
-
-    , okHandle: function (json, index, tableId, ok) {
-        if (json.code === BMY.status.ok) {
-            var okMsg = ok !== undefined ? ok : json.message;
-            layer.msg(okMsg);
-            if (index)
-                layer.close(index);
-            if (tableId)
-                layui.table.reload(tableId);
-        } else {
-            layer.msg(json.message);
-        }
-    }
-
-    , msgHandle: function (json, callback) {
-        layer.msg(json.message || json.msg || json.errorMsg || json.errMsg);
-        callback();
-    }
-    , okMsgHandle: function (json, ok) {
-        if (json.code === BMY.status.ok) {
-            var okMsg = ok !== undefined ? ok : json.message;
-            layer.msg(okMsg);
-        } else {
-            layer.msg(json.message);
-        }
-    }
 
     , dateFormatter: function (date) {
         if (date.indexOf("T") > -1) {
@@ -176,13 +137,6 @@ var ChiKa = {
             document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString();
     }
 
-    , toAdminIndex: function () {
-        location.href = BMY.url.manage_index;
-    }
-
-    , transUrl: function (url) {
-        return BMY.startsWith(url, '/management/') ? '#/' + url.substring(12) : url;
-    }
 
     , startsWith: function (str, prefix) {
         return str.slice(0, prefix.length) === prefix;

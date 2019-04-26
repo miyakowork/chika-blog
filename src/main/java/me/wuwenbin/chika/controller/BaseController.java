@@ -3,16 +3,20 @@ package me.wuwenbin.chika.controller;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import me.wuwenbin.chika.model.bean.LayuiTable;
 import me.wuwenbin.chika.model.bean.Result;
 import me.wuwenbin.chika.model.constant.CKConstant;
 import me.wuwenbin.chika.model.entity.CKUser;
+import me.wuwenbin.data.jdbc.support.Page;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.FieldError;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 import static org.springframework.util.StringUtils.isEmpty;
@@ -157,5 +161,30 @@ public abstract class BaseController {
     protected void invalidSessionUser(HttpServletRequest request) {
         request.getSession().removeAttribute(CKConstant.SESSION_USER_KEY);
         request.getSession().invalidate();
+    }
+
+    /**
+     * 以simple-spring-jdbc的Page互转
+     *
+     * @param page
+     * @param <T>
+     * @return
+     */
+    protected static <T> LayuiTable<T> layuiTable(Page<T> page) {
+        return new LayuiTable<>(page.getTotalCount(), page.getTResult());
+    }
+
+    /**
+     * 格式化错误信息
+     *
+     * @param fieldErrors
+     * @return
+     */
+    protected static String formatErrorMessage(List<FieldError> fieldErrors) {
+        StringBuilder res = new StringBuilder();
+        for (FieldError fieldError : fieldErrors) {
+            res.append("[").append(fieldError.getField()).append("]:").append(fieldError.getDefaultMessage()).append("<br/>");
+        }
+        return res.toString();
     }
 }

@@ -13,12 +13,12 @@ import javax.servlet.http.HttpServletRequest;
  */
 @Controller
 @RequestMapping("/management/article")
-public class ArticleController extends BaseController {
+public class AdminArticleController extends BaseController {
 
     private final HttpServletRequest request;
 
     @Autowired
-    public ArticleController(HttpServletRequest request) {
+    public AdminArticleController(HttpServletRequest request) {
         this.request = request;
     }
 

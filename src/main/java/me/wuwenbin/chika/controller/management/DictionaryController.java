@@ -2,6 +2,7 @@ package me.wuwenbin.chika.controller.management;
 
 import me.wuwenbin.chika.controller.BaseController;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -11,4 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/management/dictionary")
 public class DictionaryController extends BaseController {
 
+    @GetMapping
+    public String dictionary() {
+        return "management/dictionary/dict";
+    }
 }
