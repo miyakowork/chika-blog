@@ -34,4 +34,9 @@ public interface PublicService<T> {
         return baseDao().findPageListBeanByArray(sql, clazz, page);
     }
 
+    default int deleteById(){
+        String sql="delete * from {} where id = ?";
+        return 0;
+    }
+
 }

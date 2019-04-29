@@ -38,7 +38,11 @@ layui.define(['jquery', 'form', 'table'], function (exports) {
                     return d.orderIndex;
                 }
             }
-            , {field: 'type', title: '种类', sort: true}
+            , {
+                field: 'type', title: '种类', sort: true, templet: function (d) {
+                    return d.type === 'article' ? '文章分类' : d.type === 'file' ? '文件分类' : '项目分类';
+                }
+            }
             , {
                 fixed: 'right',
                 title: '操作',
@@ -58,6 +62,23 @@ layui.define(['jquery', 'form', 'table'], function (exports) {
                 , orderDirection: obj.type //排序方式
             }
         });
+    });
+
+    //监听单元格编辑
+    table.on('edit(cate)', function (obj) {
+        $.ajax({
+            url:"/management/"
+        })
+        BMY.ajax(BMY.url.prefix + "/dictionary/cate/update", obj.data, function (json) {
+            if (json.code === BMY.status.ok) {
+                layer.msg('修改成功！')
+            } else {
+                layer.msg("修改出错，错误信息：" + json.message);
+            }
+            setTimeout(function () {
+                location.hash = vipspa.stringifyDefault("/cate");
+            }, 500)
+        })
     });
 
 

@@ -42,10 +42,28 @@ public class AdminCateController extends BaseController {
             return Result.error(formatErrorMessage(result.getFieldErrors()));
         } else {
             try {
-                cateService.insertCate(ckCate);
-                return Result.ok("添加新分类成功！");
+                if (cateService.cateExist(ckCate)) {
+                    return Result.error("分类已存在！");
+                } else {
+                    cateService.insertCate(ckCate);
+                    return Result.ok("添加新分类成功！");
+                }
             } catch (Exception e) {
                 return Result.error("添加性分类失败，错误信息：" + e.getMessage());
+            }
+        }
+    }
+
+    @ResponseBody
+    @PostMapping("/update")
+    public Result updateCategory(@Valid CKCate ckCate, BindingResult result) {
+        if (result.hasErrors()) {
+            return Result.error(formatErrorMessage(result.getFieldErrors()));
+        } else {
+            if (cateService.cateExist(ckCate)) {
+                return Result.error("分类已存在！");
+            } else {
+                return Result.ok("添加新分类成功！");
             }
         }
     }

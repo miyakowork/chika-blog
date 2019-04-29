@@ -23,4 +23,13 @@ public interface CateService extends PublicService<CKCate> {
      * @return
      */
     boolean cateExist(CKCate ckCate);
+
+    /**
+     * 更新分类信息
+     *
+     * @param ckCate
+     * @return
+     * @throws Exception
+     */
+    boolean updateCategory(CKCate ckCate) throws Exception;
 }
