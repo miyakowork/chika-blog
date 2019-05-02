@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * created by Wuwenbin on 2019/4/25 at 14:53
+ * @author wuwenbin
  */
 @Controller
 @RequestMapping("/management/dictionary")

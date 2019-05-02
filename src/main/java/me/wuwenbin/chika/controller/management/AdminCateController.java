@@ -17,6 +17,7 @@ import javax.validation.Valid;
 
 /**
  * created by Wuwenbin on 2019/4/25 at 13:10
+ * @author wuwenbin
  */
 @Controller
 @RequestMapping("/management/cate")
@@ -63,7 +64,16 @@ public class AdminCateController extends BaseController {
             if (cateService.cateExist(ckCate)) {
                 return Result.error("分类已存在！");
             } else {
-                return Result.ok("添加新分类成功！");
+                try {
+                    boolean res=cateService.updateCategory(ckCate);
+                    if(res) {
+                        return Result.ok("添加新分类成功！");
+                    }else {
+                        return Result.error("添加分类失败！");
+                    }
+                } catch (Exception e) {
+                    return Result.error("添加分类失败，信息："+e.getMessage());
+                }
             }
         }
     }
